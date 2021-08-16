@@ -1,10 +1,13 @@
 from abc import ABC, abstractmethod
 import xml.etree.ElementTree as ET
+from time import sleep
 import pyautogui
 from typing import Tuple
 
 from gui.EditDialogs import ClickEditDialog, MoveCursorEditDialog, CursorPathEditDialog, PressKeyEditDialog, \
     WriteTextEditDialog, SleepEditDialog, LoopEditDialog
+
+pyautogui.FAILSAFE = False
 
 
 def handle_move_type(move_type: str, position_x: int, position_y: int,
@@ -142,7 +145,7 @@ class CursorPathAction(Action):
     def __init__(self, comment='', move_type='Absolute', duration=0, button='None', path=None):
         self.comment = comment
         self.move_type = move_type
-        self.duration = int(duration)
+        self.duration = float(duration)
         self.button = button
         if path is None:
             path = []
@@ -165,7 +168,17 @@ class CursorPathAction(Action):
                                                 'path': str(self.path)})
 
     def run(self):
-        super().run()
+        if self.path:
+            if self.button != 'None':
+                pyautogui.mouseDown(self.button)
+            if self.move_type == 'Absolute':
+                for x, y in self.path:
+                    pyautogui.moveTo(x=x, y=y, duration=self.duration)
+            else:
+                for x, y in self.path:
+                    pyautogui.move(x=x, y=y, duration=self.duration)
+            if self.button != 'None':
+                pyautogui.mouseUp(self.button)
 
 
 class PressKeyAction(Action):
@@ -194,7 +207,14 @@ class PressKeyAction(Action):
                                                 'interval': str(self.interval)})
 
     def run(self):
-        super().run()
+        if self.action == 'Press and release':
+            for _ in range(self.amount):
+                pyautogui.typewrite(self.key)
+                sleep(self.interval)
+        elif self.action == 'Press':
+            pyautogui.keyDown(self.key)
+        else:
+            pyautogui.keyUp(self.key)
 
 
 class WriteTextAction(Action):
@@ -221,7 +241,7 @@ class WriteTextAction(Action):
                                                 'interval': str(self.interval)})
 
     def run(self):
-        super().run()
+        pyautogui.typewrite(self.text * self.amount, interval=self.interval)
 
 
 class SleepAction(Action):
@@ -245,8 +265,6 @@ class SleepAction(Action):
                                                 'duration': str(self.duration)})
 
     def run(self):
-        from time import sleep
-
         sleep(self.duration)
 
 
@@ -274,4 +292,7 @@ class LoopAction(Action):
                                                 'count': str(self.count)})
 
     def run(self):
-        super().run()
+        if self.count == 0:
+            return None
+        self.count -= 1
+        return self.loop_start

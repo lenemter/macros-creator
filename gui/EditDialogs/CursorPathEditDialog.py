@@ -84,8 +84,8 @@ class PointsTable(QTableWidget):
 class CursorPathEditDialog(EditDialog):
     def __init__(self, parent, action):
         super().__init__(parent, action)
-        self.resize(400, 450)
-        self.setMinimumSize(400, 450)
+        self.resize(400, 500)
+        self.setMinimumSize(400, 500)
 
         self.move_type_comboBox.setCurrentText(self.action.move_type)
         self.set_table_state()
