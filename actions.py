@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 import pyautogui
 from typing import Tuple
 
-from gui.EditDialogs import ClickEditDialog, MoveCursorEditDialog, CursorPathEditDialog, KeySequenceEditDialog, \
+from gui.EditDialogs import ClickEditDialog, MoveCursorEditDialog, CursorPathEditDialog, PressKeyEditDialog, \
     WriteTextEditDialog, SleepEditDialog, LoopEditDialog
 
 
@@ -169,7 +169,7 @@ class CursorPathAction(Action):
 
 
 class PressKeyAction(Action):
-    name = 'Key sequence'
+    name = 'Press key'
     category = 'Keyboard'
 
     def __init__(self, comment='', key='', action='Press and release', amount=1, interval=0):
@@ -180,7 +180,7 @@ class PressKeyAction(Action):
         self.interval = float(interval)
 
     def open_edit_dialog(self, parent):
-        edit_dialog = KeySequenceEditDialog.KeySequenceEditDialog(parent, self)
+        edit_dialog = PressKeyEditDialog.PressKeyEditDialog(parent, self)
         edit_dialog.exec_()
 
         if edit_dialog.user_clicked_ok:
