@@ -58,17 +58,17 @@ class MoveCursorEditDialog(EditDialog):
         self.properties_grid.addWidget(self.position_y_spinBox, 2, 1)
 
         # Duration
-        self.duration_label = QLabel('Duration:')
+        self.duration_label = QLabel('Duration:')  # Label
         self.duration_label.setAlignment(Qt.AlignRight)
-        self.duration_doubleSpinBox = QDoubleSpinBox()
+        self.duration_doubleSpinBox = QDoubleSpinBox()  # DoubleSpinBox
 
         self.properties_grid.addWidget(self.duration_label, 3, 0)
         self.properties_grid.addWidget(self.duration_doubleSpinBox, 3, 1)
 
         # Button
-        self.button_label = QLabel('Button:')
+        self.button_label = QLabel('Button:')  # Label
         self.button_label.setAlignment(Qt.AlignRight)
-        self.button_comboBox = QComboBox()
+        self.button_comboBox = QComboBox()  # ComboBox
         self.button_comboBox.addItems(['None', 'Left', 'Right', 'Middle'])
 
         self.properties_grid.addWidget(self.button_label, 4, 0)

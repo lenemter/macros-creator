@@ -1,8 +1,8 @@
-from PyQt5.Qt import QAbstractItemModel, QStyledItemDelegate
-from PyQt5.QtCore import Qt, QModelIndex, QRect
-from PyQt5.QtGui import QDropEvent, QFont
 from PyQt5.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QDockWidget, QTreeView, QPushButton, \
     QTableWidget, QTableWidgetItem, QMenuBar, QMenu, QAction, QSizePolicy, QAbstractItemView
+from PyQt5.QtCore import Qt, QModelIndex, QRect
+from PyQt5.QtGui import QDropEvent, QFont
+from PyQt5.Qt import QAbstractItemModel, QStyledItemDelegate
 
 from actions import Action
 from gui.Widgets import ReadOnlyDelegate, VerticalLine

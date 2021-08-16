@@ -28,16 +28,16 @@ class LoopEditDialog(EditDialog):
     def init_ui(self):
         super().init_ui()
 
-        # Loop start property
-        self.loop_start_label = QLabel("Loop start:")
+        # Loop start
+        self.loop_start_label = QLabel("Loop start:")  # Label
         self.loop_start_label.setAlignment(Qt.AlignRight)
-        self.loop_start_comboBox = QComboBox()
+        self.loop_start_comboBox = QComboBox()  # ComboBox
         self.loop_start_comboBox.setEditable(True)
 
         self.properties_grid.addWidget(self.loop_start_label, 0, 0)
         self.properties_grid.addWidget(self.loop_start_comboBox, 0, 1)
 
-        # Amount property
+        # Amount
         self.count_label = QLabel('Count:')  # Label
         self.count_label.setAlignment(Qt.AlignRight)
         self.count_spinBox = QSpinBox()  # SpinBox

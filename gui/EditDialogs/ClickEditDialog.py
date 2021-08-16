@@ -11,26 +11,19 @@ class ClickEditDialog(EditDialog):
         self.action_comboBox.setCurrentText(self.action.action)
         self.check_action()
         self.button_comboBox.setCurrentText(self.action.button)
+        self.amount_spinBox.setValue(self.action.amount)
+        self.interval_doubleSpinBox.setValue(self.action.interval)
         self.move_type_comboBox.setCurrentText(self.action.move_type)
         self.set_spinBoxes_ranges()
         self.position_x_spinBox.setValue(self.action.position_x)
         self.position_y_spinBox.setValue(self.action.position_y)
         self.restore_checkBox.setChecked(self.action.restore_cursor)
-        self.amount_spinBox.setValue(self.action.amount)
-        self.interval_doubleSpinBox.setValue(self.action.interval)
 
         self.check_interval()
 
         self.action_comboBox.currentTextChanged.connect(self.check_action)
         self.move_type_comboBox.currentTextChanged.connect(self.set_spinBoxes_ranges)
         self.amount_spinBox.valueChanged.connect(self.check_interval)
-
-    def check_action(self):
-        if self.action_comboBox.currentText() != 'Press and release':
-            self.amount_spinBox.setDisabled(True)
-        else:
-            self.amount_spinBox.setDisabled(False)
-        self.check_interval()
 
     def set_spinBoxes_ranges(self):
         if self.move_type_comboBox.currentText() == 'Absolute':
@@ -39,6 +32,13 @@ class ClickEditDialog(EditDialog):
         else:
             self.position_x_spinBox.setRange(-9999, 9999)
             self.position_y_spinBox.setRange(-9999, 9999)
+
+    def check_action(self):
+        if self.action_comboBox.currentText() != 'Press and release':
+            self.amount_spinBox.setDisabled(True)
+        else:
+            self.amount_spinBox.setDisabled(False)
+        self.check_interval()
 
     def check_interval(self):
         if any((self.amount_spinBox.value() == 1, not self.amount_spinBox.isEnabled())):
@@ -71,8 +71,8 @@ class ClickEditDialog(EditDialog):
         self.button_comboBox = QComboBox()  # ComboBox
         self.button_comboBox.addItems(['Left', 'Right', 'Middle'])
 
-        self.properties_grid.addWidget(self.button_label, 1, 0)  # Add label
-        self.properties_grid.addWidget(self.button_comboBox, 1, 1)  # Add comboBox
+        self.properties_grid.addWidget(self.button_label, 1, 0)
+        self.properties_grid.addWidget(self.button_comboBox, 1, 1)
 
         # Amount
         self.amount_label = QLabel('Amount:')  # Label

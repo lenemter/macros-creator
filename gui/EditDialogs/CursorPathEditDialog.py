@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel, QComboBox, QHBoxLayout, QPushButton, QSpacerItem, QTableWidget, QSpinBox, QSizePolicy, \
-    QHeaderView, QAbstractItemView, QMessageBox
+    QHeaderView, QAbstractItemView, QMessageBox, QDoubleSpinBox
 
 from gui.EditDialogs.EditDialog import EditDialog
 
@@ -84,9 +84,13 @@ class PointsTable(QTableWidget):
 class CursorPathEditDialog(EditDialog):
     def __init__(self, parent, action):
         super().__init__(parent, action)
+        self.resize(400, 450)
+        self.setMinimumSize(400, 450)
 
         self.move_type_comboBox.setCurrentText(self.action.move_type)
         self.set_table_state()
+        self.duration_doubleSpinBox.setValue(self.action.duration)
+        self.button_comboBox.setCurrentText(self.action.button)
         self.table.fill_table(self.action.path)
 
         self.button_add_point.pressed.connect(self.table.add_point)
@@ -99,10 +103,14 @@ class CursorPathEditDialog(EditDialog):
         self.table.range_state = self.move_type_comboBox.currentText()
         self.table.update_ranges()
 
+    def properties(self):
+        return (self.comment_lineEdit.text(), self.move_type_comboBox.currentText(), self.duration_doubleSpinBox.value(),
+                self.button_comboBox.currentText(), self.table.get_points_list())
+
     def init_ui(self):
         super().init_ui()
 
-        # Type property
+        # Move type
         self.move_type_label = QLabel('Type:')  # Label
         self.move_type_label.setAlignment(Qt.AlignRight)
         self.move_type_comboBox = QComboBox()  # ComboBox
@@ -111,7 +119,24 @@ class CursorPathEditDialog(EditDialog):
         self.properties_grid.addWidget(self.move_type_label, 0, 0)
         self.properties_grid.addWidget(self.move_type_comboBox, 0, 1)
 
-        # Buttons
+        # Duration
+        self.duration_label = QLabel('Duration:')  # Label
+        self.duration_label.setAlignment(Qt.AlignRight)
+        self.duration_doubleSpinBox = QDoubleSpinBox()  # DoubleSpinBox
+
+        self.properties_grid.addWidget(self.duration_label, 1, 0)
+        self.properties_grid.addWidget(self.duration_doubleSpinBox, 1, 1)
+
+        # Button
+        self.button_label = QLabel('Button:')  # Label
+        self.button_label.setAlignment(Qt.AlignRight)
+        self.button_comboBox = QComboBox()  # ComboBox
+        self.button_comboBox.addItems(['None', 'Left', 'Right', 'Middle'])
+
+        self.properties_grid.addWidget(self.button_label, 2, 0)
+        self.properties_grid.addWidget(self.button_comboBox, 2, 1)
+
+        # Table buttons
         self.buttons_layout = QHBoxLayout()
         self.layout.insertLayout(5, self.buttons_layout)
         self.button_add_point = QPushButton('Add point')

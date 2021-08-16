@@ -14,9 +14,9 @@ class SleepEditDialog(EditDialog):
         super().init_ui()
 
         # Duration property
-        self.duration_label = QLabel("Duration:")
+        self.duration_label = QLabel("Duration:")  # Label
         self.duration_label.setAlignment(Qt.AlignRight)
-        self.duration_doubleSpinBox = QDoubleSpinBox()
+        self.duration_doubleSpinBox = QDoubleSpinBox()  # DoubleSpinBox
 
         self.properties_grid.addWidget(self.duration_label, 0, 0)
         self.properties_grid.addWidget(self.duration_doubleSpinBox, 0, 1)

@@ -139,13 +139,15 @@ class CursorPathAction(Action):
     name = 'Cursor path'
     category = 'Mouse'
 
-    def __init__(self, comment='', move_type='Absolute', path=None):
+    def __init__(self, comment='', move_type='Absolute', duration=0, button='None', path=None):
+        self.comment = comment
+        self.move_type = move_type
+        self.duration = int(duration)
+        self.button = button
         if path is None:
             path = []
         if type(path) == str:
             path = eval(path)  # Sorry.
-        self.comment = comment
-        self.move_type = move_type
         self.path = path
 
     def open_edit_dialog(self, parent):
@@ -153,27 +155,26 @@ class CursorPathAction(Action):
         edit_dialog.exec_()
 
         if edit_dialog.user_clicked_ok:
-            self.comment = edit_dialog.comment_lineEdit.text()
-            self.move_type = edit_dialog.move_type_comboBox.currentText()
-            self.path = edit_dialog.table.get_points_list()
+            self.comment, self.move_type, self.duration, self.button, self.path = edit_dialog.properties()
 
     def xml(self):
         return ET.Element(self.get_xml_name(), {'comment': self.comment,
                                                 'move_type': self.move_type,
+                                                'duration': str(self.duration),
+                                                'button': self.button,
                                                 'path': str(self.path)})
 
     def run(self):
-        # TODO
         super().run()
 
 
-class KeySequenceAction(Action):
+class PressKeyAction(Action):
     name = 'Key sequence'
     category = 'Keyboard'
 
-    def __init__(self, comment='', key_sequence='', action='Press and release', amount=1, interval=0):
+    def __init__(self, comment='', key='', action='Press and release', amount=1, interval=0):
         self.comment = comment
-        self.key_sequence = key_sequence
+        self.key = key
         self.action = action
         self.amount = int(amount)
         self.interval = float(interval)
@@ -183,16 +184,14 @@ class KeySequenceAction(Action):
         edit_dialog.exec_()
 
         if edit_dialog.user_clicked_ok:
-            self.comment = edit_dialog.comment_lineEdit.text()
-            self.key_sequence = edit_dialog.key_sequence_lineEdit.text()
-            self.action = edit_dialog.action_comboBox.currentText()
-            self.amount = edit_dialog.amount_spinBox.value()
+            self.comment, self.key, self.action, self.amount, self.interval = edit_dialog.properties()
 
     def xml(self):
         return ET.Element(self.get_xml_name(), {'comment': self.comment,
-                                                'key_sequence': self.key_sequence,
+                                                'key': self.key,
                                                 'action': self.action,
-                                                'amount': str(self.amount)})
+                                                'amount': str(self.amount),
+                                                'interval': str(self.interval)})
 
     def run(self):
         super().run()
@@ -202,24 +201,24 @@ class WriteTextAction(Action):
     name = 'Write text'
     category = 'Keyboard'
 
-    def __init__(self, comment='', text='', amount=1):
+    def __init__(self, comment='', text='', amount=1, interval=0):
         self.comment = comment
         self.text = text
         self.amount = int(amount)
+        self.interval = float(interval)
 
     def open_edit_dialog(self, parent):
         edit_dialog = WriteTextEditDialog.WriteTextEditDialog(parent, self)
         edit_dialog.exec_()
 
         if edit_dialog.user_clicked_ok:
-            self.comment = edit_dialog.comment_lineEdit.text()
-            self.text = edit_dialog.text_textEdit.toPlainText()
-            self.amount = edit_dialog.amount_spinBox.value()
+            self.comment, self.text, self.amount, self.interval = edit_dialog.properties()
 
     def xml(self):
         return ET.Element(self.get_xml_name(), {'comment': self.comment,
                                                 'text': self.text,
-                                                'amount': str(self.amount)})
+                                                'amount': str(self.amount),
+                                                'interval': str(self.interval)})
 
     def run(self):
         super().run()
