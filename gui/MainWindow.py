@@ -1,7 +1,6 @@
-from pathlib import Path
-
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QAbstractItemView
+from pathlib import Path
 
 from gui.MainWindowUI import MainWindowUI
 from parser import FileRead, FileWrite, Runner
