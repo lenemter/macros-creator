@@ -25,6 +25,9 @@ class LoopEditDialog(EditDialog):
         else:
             self.loop_start_comboBox.setCurrentIndex(old_loop_start - 1)
 
+    def properties(self):
+        return self.comment_lineEdit.text(), int(self.loop_start_comboBox.currentText()), self.count_spinBox.value()
+
     def init_ui(self):
         super().init_ui()
 

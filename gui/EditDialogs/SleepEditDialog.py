@@ -10,6 +10,9 @@ class SleepEditDialog(EditDialog):
 
         self.duration_doubleSpinBox.setValue(self.action.duration)
 
+    def properties(self):
+        return self.comment_lineEdit.text(), self.duration_doubleSpinBox.value()
+
     def init_ui(self):
         super().init_ui()
 

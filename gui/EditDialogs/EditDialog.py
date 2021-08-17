@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QDialogButtonBox, QSpacerItem, \
     QSizePolicy, QGridLayout
 from PyQt5.QtCore import Qt
-from abc import abstractmethod, ABC
 
 from gui.Widgets import HorizontalLine
 
@@ -86,23 +85,3 @@ class EditDialog(QDialog):
 
         self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.layout.addWidget(self.button_box)
-
-
-class MousePathEditDialog(EditDialog):
-    pass
-
-
-class PressKeyEditDialog(EditDialog):
-    pass
-
-
-class WriteTextEditDialog(EditDialog):
-    pass
-
-
-class SleepDialog(EditDialog):
-    pass
-
-
-class LoopEditDialog(EditDialog):
-    pass

@@ -1,14 +1,8 @@
+from PyQt5.QtWidgets import QLabel, QComboBox, QHBoxLayout, QPushButton, QTableWidget, QSpinBox, QHeaderView, \
+    QAbstractItemView, QMessageBox, QDoubleSpinBox
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QLabel, QComboBox, QHBoxLayout, QPushButton, QSpacerItem, QTableWidget, QSpinBox, QSizePolicy, \
-    QHeaderView, QAbstractItemView, QMessageBox, QDoubleSpinBox
 
 from gui.EditDialogs.EditDialog import EditDialog
-
-
-class PointSpinBox(QSpinBox):
-    def __init__(self):
-        super().__init__()
-        self.setRange(0, 9999)
 
 
 class PointsTable(QTableWidget):
@@ -48,8 +42,8 @@ class PointsTable(QTableWidget):
         self.setRowCount(self.rowCount() + 1)
 
         for i in range(self.columnCount()):
-            spin_box = PointSpinBox()
-            spin_box.setValue(-1)
+            spin_box = QSpinBox()
+            spin_box.setMaximum(9999)
             self.setCellWidget(self.rowCount() - 1, i, spin_box)
 
         if self.range_state == 'Absolute':

@@ -18,8 +18,7 @@ class SleepAction(Action):
         edit_dialog.exec_()
 
         if edit_dialog.user_clicked_ok:
-            self.comment = edit_dialog.comment_lineEdit.text()
-            self.duration = edit_dialog.duration_doubleSpinBox.value()
+            self.comment, self.duration = edit_dialog.properties()
 
     def xml(self):
         return ET.Element(self.get_xml_name(), {'comment': self.comment,

@@ -18,9 +18,7 @@ class LoopAction(Action):
         edit_dialog.exec_()
 
         if edit_dialog.user_clicked_ok:
-            self.comment = edit_dialog.comment_lineEdit.text()
-            self.loop_start = int(edit_dialog.loop_start_comboBox.currentText())
-            self.count = edit_dialog.count_spinBox.value()
+            self.comment, self.loop_start, self.count = edit_dialog.properties()
 
     def xml(self):
         return ET.Element(self.get_xml_name(), {'comment': self.comment,
