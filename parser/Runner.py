@@ -1,6 +1,5 @@
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
-from PyQt5.QtCore import QThread
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QPushButton, QSizePolicy
 from functools import partial
 
 from parser.FileRead import read_file
@@ -11,7 +10,6 @@ def run(filepath):
     window.exec_()
 
 
-# Step 1: Create a worker class
 class Runner(QObject):
     finished = pyqtSignal()
 
@@ -21,7 +19,6 @@ class Runner(QObject):
         self.filepath = filepath
 
     def run(self):
-        """Long-running task."""
         QThread.msleep(1000)
         actions = read_file(self.filepath)
         i = 0
@@ -42,21 +39,16 @@ class StopWindow(QDialog):
         self.init_ui()
         self.filepath = filepath
 
-        # Step 2: Create a QThread object
         self.thread = QThread()
-        # Step 3: Create a worker object
         self.runner = Runner(self.filepath)
-        # Step 4: Move worker to the thread
         self.runner.moveToThread(self.thread)
-        # Step 5: Connect signals and slots
         self.thread.started.connect(partial(self.runner.run))
         self.runner.finished.connect(self.close_everything)
         self.stop_button.pressed.connect(self.close_everything)
-        # Step 6: Start the thread
+
         self.thread.start()
 
     def close_everything(self):
-        self.stop_button.setText('Quiting...')
         self.runner.stop_flag = True
         self.thread.wait()
         self.close()
@@ -64,10 +56,12 @@ class StopWindow(QDialog):
     def init_ui(self):
         self.resize(200, 200)
         self.setMinimumSize(200, 200)
+        self.move(0, 0)
 
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
         self.stop_button = QPushButton('Stop (Ctrl+Esc)')
         self.stop_button.setShortcut('Ctrl+Esc')
+        self.stop_button.setSizePolicy(QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum))
         self.layout.addWidget(self.stop_button)
