@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QAbstractItem
 from PyQt5.QtCore import Qt
 from pathlib import Path
 
+import actions.Action
 from gui.MainWindowUI import MainWindowUI
 from parser import FileRead, FileWrite, Runner
 
@@ -34,7 +35,8 @@ class MainWindow(QMainWindow, MainWindowUI):
         model = self.new_action_tree.model()
         index = self.new_action_tree.currentIndex()
         action_class = model.data(index, Qt.UserRole)
-        self.table.add_action(action_class)
+        if type(action_class) != str:
+            self.table.add_action(action_class)
 
     def open_edit_dialog(self):
         selected_rows = self.get_selected_rows()
