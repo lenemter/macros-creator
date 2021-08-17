@@ -1,4 +1,4 @@
-from actions import Action
+from actions.Action import Action
 import xml.etree.ElementTree as ET
 
 name_class_dict = dict()

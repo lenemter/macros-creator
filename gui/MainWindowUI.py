@@ -4,7 +4,8 @@ from PyQt5.QtCore import Qt, QModelIndex, QRect
 from PyQt5.QtGui import QDropEvent, QFont
 from PyQt5.Qt import QAbstractItemModel, QStyledItemDelegate
 
-from actions import Action
+from actions.Action import Action
+import actions
 from gui.Widgets import ReadOnlyDelegate, VerticalLine
 
 
