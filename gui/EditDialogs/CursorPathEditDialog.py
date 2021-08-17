@@ -93,9 +93,9 @@ class CursorPathEditDialog(EditDialog):
         self.button_comboBox.setCurrentText(self.action.button)
         self.table.fill_table(self.action.path)
 
-        self.button_add_point.pressed.connect(self.table.add_point)
-        self.button_remove_point.pressed.connect(self.table.remove_point)
-        self.button_clear_points.pressed.connect(self.table.clear_points)
+        self.add_point_button.pressed.connect(self.table.add_point)
+        self.remove_point_button.pressed.connect(self.table.remove_point)
+        self.clear_points_button.pressed.connect(self.table.clear_points)
 
         self.move_type_comboBox.currentTextChanged.connect(self.set_table_state)
 
@@ -138,16 +138,15 @@ class CursorPathEditDialog(EditDialog):
 
         # Table buttons
         self.buttons_layout = QHBoxLayout()
+        self.buttons_layout.setAlignment(Qt.AlignLeft)
         self.layout.insertLayout(5, self.buttons_layout)
-        self.button_add_point = QPushButton('Add point')
-        self.button_remove_point = QPushButton('Remove')
-        self.button_clear_points = QPushButton('Clear')
+        self.add_point_button = QPushButton('Add point')
+        self.remove_point_button = QPushButton('Remove')
+        self.clear_points_button = QPushButton('Clear')
 
-        self.buttons_layout.addWidget(self.button_add_point)
-        self.buttons_layout.addWidget(self.button_remove_point)
-        self.buttons_layout.addWidget(self.button_clear_points)
-        self.spacer = QSpacerItem(1000, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.buttons_layout.addSpacerItem(self.spacer)
+        self.buttons_layout.addWidget(self.add_point_button)
+        self.buttons_layout.addWidget(self.remove_point_button)
+        self.buttons_layout.addWidget(self.clear_points_button)
 
         # Table
         self.table = PointsTable()
