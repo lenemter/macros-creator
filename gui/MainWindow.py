@@ -13,13 +13,13 @@ class MainWindow(QMainWindow, MainWindowUI):
         QMainWindow.__init__(self)
         MainWindowUI.init_ui(self, self)
 
-        self.actions_tree.doubleClicked.connect(self.add_item_to_table)
+        self.new_action_tree.doubleClicked.connect(self.add_item_to_table)
         self.table.itemChanged.connect(self.not_saved)
         self.table.doubleClicked.connect(self.open_edit_dialog)
-        self.button_delete.pressed.connect(self.delete)
-        self.button_move_up.pressed.connect(self.move_up)
-        self.button_move_down.pressed.connect(self.move_down)
-        self.button_run.pressed.connect(self.run)
+        self.delete_button.pressed.connect(self.delete)
+        self.move_up_button.pressed.connect(self.move_up)
+        self.move_down_button.pressed.connect(self.move_down)
+        self.run_button.pressed.connect(self.run)
         self.action_new.triggered.connect(self.new)
         self.action_open.triggered.connect(self.open)
         self.action_save.triggered.connect(self.save)
@@ -31,8 +31,8 @@ class MainWindow(QMainWindow, MainWindowUI):
         return list(set(item.row() for item in self.table.selectedIndexes()))
 
     def add_item_to_table(self):
-        model = self.actions_tree.model()
-        index = self.actions_tree.currentIndex()
+        model = self.new_action_tree.model()
+        index = self.new_action_tree.currentIndex()
         action_class = model.data(index, Qt.UserRole)
         self.table.add_action(action_class)
 

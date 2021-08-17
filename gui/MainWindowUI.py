@@ -126,7 +126,7 @@ class ActionsTreeModel(QAbstractItemModel):
         return self._root
 
 
-class ActionsTree(QTreeView):
+class NewActionTree(QTreeView):
     def __init__(self):
         super().__init__()
 
@@ -225,69 +225,70 @@ class MainWindowUI:
 
         # Main layout
         self.layout = QHBoxLayout(self.central_widget)
-        self.layout.setContentsMargins(0, 4, 0, 0)
-        self.layout.setStretch(1, 4)
+        self.layout.setContentsMargins(0, 0, 0, 0)
 
-        # Actions dock
-        self.actions_dock = QDockWidget()
-        self.actions_dock.setWindowTitle('Actions')
-        self.actions_dock.setMinimumWidth(190)
-        self.actions_dock.setFeatures(
+        # New action dock
+        self.new_action_dock = QDockWidget()
+        self.new_action_dock.setWindowTitle('New action')
+        self.new_action_dock.setMinimumWidth(190)
+        self.new_action_dock.setFeatures(
             QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetClosable)
-        self.actions_dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        self.new_action_dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        # New action dock content and layout
         self.actions_dock_content = QWidget()
+        self.new_action_dock.setWidget(self.actions_dock_content)
         self.actions_dock_layout = QVBoxLayout(self.actions_dock_content)
         self.actions_dock_layout.setContentsMargins(0, 0, 0, 0)
-        self.actions_dock.setWidget(self.actions_dock_content)
-        main_window.addDockWidget(Qt.LeftDockWidgetArea, self.actions_dock)
+        main_window.addDockWidget(Qt.LeftDockWidgetArea, self.new_action_dock)
 
-        # Actions tree
-        self.actions_tree = ActionsTree()
-        self.actions_dock_layout.addWidget(self.actions_tree)
+        # New action tree
+        self.new_action_tree = NewActionTree()
+        self.actions_dock_layout.addWidget(self.new_action_tree)
 
-        # Buttons
-        self.table_layout = QVBoxLayout()
-        self.table_layout.setSpacing(6)
-        self.layout.addLayout(self.table_layout)
+        # Actions
+        self.actions_table_layout = QVBoxLayout()
+        self.actions_table_layout.setContentsMargins(0, 4, 0, 0)
+        self.actions_table_layout.setSpacing(4)
+        self.layout.addLayout(self.actions_table_layout)
 
         self.buttons_layout = QHBoxLayout()
         self.buttons_layout.setAlignment(Qt.AlignLeft)
-        self.table_layout.addLayout(self.buttons_layout)
+        self.actions_table_layout.addLayout(self.buttons_layout)
 
-        buttons_size_policy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        self.button_delete = QPushButton('Delete')
-        self.button_delete.setShortcut('Del')
-        self.button_delete.setToolTip('Deleted selected actions (Del)')
-        self.button_delete.setSizePolicy(buttons_size_policy)
-        self.buttons_layout.addWidget(self.button_delete)
+        button_size_policy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.delete_button = QPushButton('Delete')
+        self.delete_button.setShortcut('Del')
+        self.delete_button.setToolTip('Delete selected actions (Del)')
+        self.delete_button.setSizePolicy(button_size_policy)
+        self.buttons_layout.addWidget(self.delete_button)
 
         self.divider_1 = VerticalLine()
         self.buttons_layout.addWidget(self.divider_1)
 
-        self.button_move_up = QPushButton('Move up')
-        # self.button_move_up.setShortcut('')  # todo: Make shortcut
-        # self.button_move_up.setToolTip('')  # todo: Make tooltip
-        self.button_move_up.setSizePolicy(buttons_size_policy)
-        self.buttons_layout.addWidget(self.button_move_up)
+        self.move_up_button = QPushButton('Move up')
+        self.move_up_button.setShortcut('Ctrl+Up')
+        self.move_up_button.setToolTip('Move selected actions up (Ctrl+Up)')
+        self.move_up_button.setSizePolicy(button_size_policy)
+        self.buttons_layout.addWidget(self.move_up_button)
 
-        self.button_move_down = QPushButton('Move down')
-        # self.button_move_down.setShortcut('')  # todo: Make shortcut
-        # self.button_moce_down.setToolTip('')  # todo: Make tooltip
-        self.button_move_down.setSizePolicy(buttons_size_policy)
-        self.buttons_layout.addWidget(self.button_move_down)
+        self.move_down_button = QPushButton('Move down')
+        self.move_down_button.setShortcut('Ctrl+Down')
+        self.move_down_button.setToolTip('Move selected actions down (Ctrl+Down)')
+        self.move_down_button.setSizePolicy(button_size_policy)
+        self.buttons_layout.addWidget(self.move_down_button)
 
         self.divider_2 = VerticalLine()
         self.buttons_layout.addWidget(self.divider_2)
 
-        self.button_run = QPushButton('Run')
-        self.button_run.setShortcut('Ctrl+Space')
-        self.button_run.setToolTip('Run program (Ctrl+Space)')
-        self.button_run.setSizePolicy(buttons_size_policy)
-        self.buttons_layout.addWidget(self.button_run)
+        self.run_button = QPushButton('Run')
+        self.run_button.setShortcut('Ctrl+Space')
+        self.run_button.setToolTip('Run macro (Ctrl+Space)')
+        self.run_button.setSizePolicy(button_size_policy)
+        self.buttons_layout.addWidget(self.run_button)
 
         # Table
         self.table = TableWidget()
-        self.table_layout.addWidget(self.table)
+        self.actions_table_layout.addWidget(self.table)
 
         # Menubar
         self.menubar = QMenuBar(main_window)
