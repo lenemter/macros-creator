@@ -57,6 +57,7 @@ class StopWindow(QDialog):
         self.resize(200, 200)
         self.setMinimumSize(200, 200)
         self.move(0, 0)
+        self.setWindowTitle("Stop")
 
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
