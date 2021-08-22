@@ -1,8 +1,7 @@
-from PyQt5.QtGui import QFont, QIcon, QDropEvent, QDragMoveEvent, QMouseEvent
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QDockWidget, QTreeView, QTableWidget, QPushButton, \
-    QMenuBar, QMenu, QAction, QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, \
-    QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QDockWidget, QTreeView, QPushButton, QMenuBar, QMenu, \
+    QAction, QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox
 from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect
+from PyQt5.QtGui import QFont, QIcon, QDropEvent, QDragMoveEvent
 from pathlib import Path
 
 from actions.Action import Action, NoneAction

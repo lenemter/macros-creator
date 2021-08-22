@@ -2,8 +2,6 @@ from PyQt5.QtCore import QObject, QThread, pyqtSignal
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QPushButton, QSizePolicy
 from functools import partial
 
-from parser.FileRead import read_file
-
 
 def run(actions):
     window = StopWindow(actions)
