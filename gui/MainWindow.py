@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QDockWidget, QTreeView, QPushButton, QMenuBar, QMenu, \
     QAction, QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox
-from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect
+from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QDropEvent, QDragMoveEvent
 from pathlib import Path
 
@@ -8,6 +8,24 @@ from actions.Action import Action, NoneAction
 from parser import Runner, FileRead, FileWrite
 
 home = str(Path.home())
+
+
+class CloseDockWidget(QDockWidget):
+    closed = pyqtSignal()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.is_closed = False
+
+    def closeEvent(self, event) -> None:
+        self.closed.emit()
+        self.is_closed = True
+        super().closeEvent(event)
+
+    def show(self) -> None:
+        self.closed.emit()
+        self.is_closed = False
+        super().show()
 
 
 class NewActionTreeNode:
@@ -316,6 +334,8 @@ class MainWindow(QMainWindow):
         self.is_saved = True
 
         self.actions_table.doubleClicked.connect(self.open_action_edit_dialog)
+        self.new_action_dock.closed.connect(self.sync_dock_and_action)
+        self.action_new_action_dock.triggered.connect(self.handle_dock_state)
         self.delete_button.pressed.connect(self.delete)
         self.move_up_button.pressed.connect(self.move_up)
         self.move_down_button.pressed.connect(self.move_down)
@@ -427,6 +447,16 @@ class MainWindow(QMainWindow):
         FileWrite.write_file(self.opened_file, self.actions_table.model().actions)
         self.saved()
 
+    def sync_dock_and_action(self):
+        self.action_new_action_dock.setChecked(self.new_action_dock.is_closed)
+
+    def handle_dock_state(self):
+        is_checked = self.action_new_action_dock.isChecked()
+        if is_checked:
+            self.new_action_dock.show()
+        else:
+            self.new_action_dock.close()
+
     def init_ui(self):
         self.setWindowTitle(self.opened_file)
         self.setWindowModified(False)
@@ -442,8 +472,7 @@ class MainWindow(QMainWindow):
         self.centralWidget.setLayout(self.layout)
 
         # New action dock
-        self.new_action_dock = QDockWidget('New action')
-        self.new_action_dock.setFeatures(QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable)
+        self.new_action_dock = CloseDockWidget('New action')
         self.new_action_dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.new_action_dock)
         # New action dock content
@@ -520,24 +549,23 @@ class MainWindow(QMainWindow):
         self.menubar.setGeometry(QRect(0, 0, 800, 30))
         self.setMenuBar(self.menubar)
 
-        self.menu_file = QMenu(self.menubar)
-        self.menu_file.setTitle('File')
+        self.menu_file = QMenu('File', self.menubar)
+        self.menubar.addAction(self.menu_file.menuAction())
 
-        self.action_new = QAction(self)
-        self.action_new.setText('New')
+        self.action_new = QAction('New', self)
         self.action_new.setShortcut('Ctrl+N')
-        self.action_open = QAction(self)
-        self.action_open.setText('Open')
+        self.action_open = QAction('Open', self)
         self.action_open.setShortcut('Ctrl+O')
-        self.action_save = QAction(self)
-        self.action_save.setText('Save')
+        self.action_save = QAction('Save', self)
         self.action_save.setShortcut('Ctrl+S')
 
         self.menu_file.addAction(self.action_new)
         self.menu_file.addAction(self.action_open)
         self.menu_file.addAction(self.action_save)
-        self.menubar.addAction(self.menu_file.menuAction())
 
-        self.menu_windows = QMenu(self.menubar)
-        self.menu_windows.setTitle('Windows')
-        # todo create toggle for Actions dock
+        self.menu_windows = QMenu('Windows', self.menubar)
+        self.menubar.addAction(self.menu_windows.menuAction())
+        self.action_new_action_dock = QAction('New action', self)
+        self.action_new_action_dock.setCheckable(True)
+        self.action_new_action_dock.setChecked(True)
+        self.menu_windows.addAction(self.action_new_action_dock)
