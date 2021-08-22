@@ -13,7 +13,7 @@ class Action(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def open_edit_dialog(self, parent):
+    def open_edit_dialog(self, parent) -> bool:
         raise NotImplementedError
 
     def get_xml_name(self):

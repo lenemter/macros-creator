@@ -17,13 +17,17 @@ class MoveCursorAction(Action):
         self.duration = float(duration)
         self.button = button
 
-    def open_edit_dialog(self, parent):
+    def open_edit_dialog(self, parent) -> bool:
         edit_dialog = MoveCursorEditDialog.MoveCursorEditDialog(parent, self)
         edit_dialog.exec_()
 
         if edit_dialog.user_clicked_ok:
             properties = edit_dialog.properties()
-            self.comment, self.move_type, self.position_x, self.position_y, self.duration, self.button = properties
+            was_changed = (self.comment, self.move_type, self.position_x, self.position_y, self.duration,
+                           self.button) != properties
+            if was_changed:
+                self.comment, self.move_type, self.position_x, self.position_y, self.duration, self.button = properties
+            return was_changed
 
     def xml(self):
         return ET.Element(self.get_xml_name(), {'comment': self.comment,

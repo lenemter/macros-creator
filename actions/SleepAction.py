@@ -13,12 +13,16 @@ class SleepAction(Action):
         self.comment = comment
         self.duration = float(duration)
 
-    def open_edit_dialog(self, parent):
+    def open_edit_dialog(self, parent) -> bool:
         edit_dialog = SleepEditDialog.SleepEditDialog(parent, self)
         edit_dialog.exec_()
 
         if edit_dialog.user_clicked_ok:
-            self.comment, self.duration = edit_dialog.properties()
+            properties = edit_dialog.properties()
+            was_changed = (self.comment, self.duration) != properties
+            if was_changed:
+                self.comment, self.duration = properties
+            return was_changed
 
     def xml(self):
         return ET.Element(self.get_xml_name(), {'comment': self.comment,

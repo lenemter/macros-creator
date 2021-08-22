@@ -15,12 +15,16 @@ class WriteTextAction(Action):
         self.amount = int(amount)
         self.interval = float(interval)
 
-    def open_edit_dialog(self, parent):
+    def open_edit_dialog(self, parent) -> bool:
         edit_dialog = WriteTextEditDialog.WriteTextEditDialog(parent, self)
         edit_dialog.exec_()
 
         if edit_dialog.user_clicked_ok:
-            self.comment, self.text, self.amount, self.interval = edit_dialog.properties()
+            properties = edit_dialog.properties()
+            was_changed = (self.comment, self.text, self.amount, self.interval) != properties
+            if was_changed:
+                self.comment, self.text, self.amount, self.interval = properties
+            return was_changed
 
     def xml(self):
         return ET.Element(self.get_xml_name(), {'comment': self.comment,

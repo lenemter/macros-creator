@@ -34,14 +34,18 @@ class ClickAction(Action):
         self.position_y = int(position_y)
         self.restore_cursor = int(restore_cursor)  # 0 - False, 1 - True
 
-    def open_edit_dialog(self, parent):
+    def open_edit_dialog(self, parent) -> bool:
         edit_dialog = ClickEditDialog.ClickEditDialog(parent, self)
         edit_dialog.exec_()
 
         if edit_dialog.user_clicked_ok:
             properties = edit_dialog.properties()
-            (self.comment, self.action, self.button, self.amount, self.interval, self.move_type, self.position_x,
-             self.position_y, self.restore_cursor) = properties
+            was_changed = (self.comment, self.action, self.button, self.amount, self.interval, self.move_type,
+                           self.position_x, self.position_y, self.restore_cursor) != properties
+            if was_changed:
+                (self.comment, self.action, self.button, self.amount, self.interval, self.move_type, self.position_x,
+                 self.position_y, self.restore_cursor) = properties
+            return was_changed
 
     def xml(self):
         return ET.Element(self.get_xml_name(), {'comment': self.comment,

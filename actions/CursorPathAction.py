@@ -25,9 +25,10 @@ class CursorPathAction(Action):
         edit_dialog.exec_()
 
         if edit_dialog.user_clicked_ok:
-            was_changed = (self.comment, self.move_type, self.duration, self.button, self.path) == edit_dialog.properties()
+            properties = edit_dialog.properties()
+            was_changed = (self.comment, self.move_type, self.duration, self.button, self.path) != properties
             if was_changed:
-                self.comment, self.move_type, self.duration, self.button, self.path = edit_dialog.properties()
+                self.comment, self.move_type, self.duration, self.button, self.path = properties
             return was_changed
 
     def xml(self):
