@@ -20,12 +20,15 @@ class CursorPathAction(Action):
             path = eval(path)  # Sorry.
         self.path = path
 
-    def open_edit_dialog(self, parent):
+    def open_edit_dialog(self, parent) -> bool:
         edit_dialog = CursorPathEditDialog.CursorPathEditDialog(parent, self)
         edit_dialog.exec_()
 
         if edit_dialog.user_clicked_ok:
-            self.comment, self.move_type, self.duration, self.button, self.path = edit_dialog.properties()
+            was_changed = (self.comment, self.move_type, self.duration, self.button, self.path) == edit_dialog.properties()
+            if was_changed:
+                self.comment, self.move_type, self.duration, self.button, self.path = edit_dialog.properties()
+            return was_changed
 
     def xml(self):
         return ET.Element(self.get_xml_name(), {'comment': self.comment,

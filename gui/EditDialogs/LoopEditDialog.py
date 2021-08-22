@@ -7,26 +7,29 @@ from gui.EditDialogs.EditDialog import EditDialog
 class LoopEditDialog(EditDialog):
     def __init__(self, parent, action):
         super().__init__(parent, action)
+        self.row_count = self.parent().actions_table.model().rowCount()
 
         self.set_loop_start_comboBox_values()
         self.set_loop_start_value()
         self.count_spinBox.setValue(self.action.count)
 
     def set_loop_start_comboBox_values(self):
-        row_count = self.parent().table.rowCount()
-        for i in range(1, row_count + 1):
+        for i in range(1, self.row_count + 1):
             self.loop_start_comboBox.addItem(str(i))
 
     def set_loop_start_value(self):
         old_loop_start = self.action.loop_start
-        row_count = self.parent().table.rowCount()
-        if old_loop_start > row_count:
-            self.loop_start_comboBox.setCurrentIndex(row_count - 1)
+        if old_loop_start > self.row_count:
+            self.loop_start_comboBox.setCurrentIndex(self.row_count - 1)
         else:
             self.loop_start_comboBox.setCurrentIndex(old_loop_start - 1)
 
     def properties(self):
-        return self.comment_lineEdit.text(), int(self.loop_start_comboBox.currentText()), self.count_spinBox.value()
+        try:
+            loop_start = int(self.loop_start_comboBox.currentText())
+        except ValueError:
+            loop_start = self.line_number
+        return self.comment_lineEdit.text(), loop_start, self.count_spinBox.value()
 
     def init_ui(self):
         super().init_ui()

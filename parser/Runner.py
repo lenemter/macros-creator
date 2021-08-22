@@ -5,25 +5,24 @@ from functools import partial
 from parser.FileRead import read_file
 
 
-def run(filepath):
-    window = StopWindow(filepath)
+def run(actions):
+    window = StopWindow(actions)
     window.exec_()
 
 
 class Runner(QObject):
     finished = pyqtSignal()
 
-    def __init__(self, filepath):
+    def __init__(self, actions):
         super().__init__()
         self.stop_flag = False
-        self.filepath = filepath
+        self.actions = actions
 
     def run(self):
         QThread.msleep(1000)
-        actions = read_file(self.filepath)
         i = 0
-        while i < len(actions) and not self.stop_flag:
-            next_line = actions[i].run()
+        while i < len(self.actions) and not self.stop_flag:
+            next_line = self.actions[i].run()
             if next_line is None:
                 next_line = i + 1
             else:
@@ -34,13 +33,13 @@ class Runner(QObject):
 
 
 class StopWindow(QDialog):
-    def __init__(self, filepath):
+    def __init__(self, actions):
         super().__init__()
         self.init_ui()
-        self.filepath = filepath
+        self.actions_list = actions
 
         self.thread = QThread()
-        self.runner = Runner(self.filepath)
+        self.runner = Runner(self.actions_list)
         self.runner.moveToThread(self.thread)
         self.thread.started.connect(partial(self.runner.run))
         self.runner.finished.connect(self.close_everything)

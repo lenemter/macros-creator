@@ -55,6 +55,7 @@ class ClickAction(Action):
                                                 'restore_cursor': str(self.restore_cursor)})
 
     def run(self):
+        # todo: fix bug
         mouse_position = pyautogui.position()
         x, y = handle_move_type(self.move_type, self.position_x, self.position_y, mouse_position)
 

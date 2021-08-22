@@ -48,12 +48,13 @@ class EditDialog(QDialog):
         self.title.setFont(font)
         self.layout.addWidget(self.title)
 
-        self.line_number = QLabel(f'Line: {self.parent().table.actions_list.index(self.action) + 1}')
-        self.line_number.setAlignment(Qt.AlignHCenter)
-        font = self.line_number.font()
+        self.line_number = self.parent().actions_table.model().actions.index(self.action) + 1
+        self.line_label = QLabel(f'Line: {self.line_number}')
+        self.line_label.setAlignment(Qt.AlignHCenter)
+        font = self.line_label.font()
         font.setPointSize(9)
-        self.line_number.setFont(font)
-        self.layout.addWidget(self.line_number)
+        self.line_label.setFont(font)
+        self.layout.addWidget(self.line_label)
 
         # Comment
         self.comment_layout = QHBoxLayout()

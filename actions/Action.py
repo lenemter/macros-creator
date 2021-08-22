@@ -26,3 +26,8 @@ class Action(ABC):
     @abstractmethod
     def run(self):
         raise NotImplementedError
+
+
+class NoneAction:
+    name = ''
+    comment = ''
