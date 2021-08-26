@@ -12,6 +12,7 @@ class LoopAction(Action):
         self.comment = comment
         self.loop_start = int(loop_start)
         self.count = int(count)
+        self._count = self.count
 
     def open_edit_dialog(self, parent) -> bool:
         edit_dialog = LoopEditDialog.LoopEditDialog(parent, self)
@@ -30,7 +31,8 @@ class LoopAction(Action):
                                                 'count': str(self.count)})
 
     def run(self):
-        if self.count == 0:
+        if self._count == 0:
+            self._count = self.count
             return None
-        self.count -= 1
+        self._count -= 1
         return self.loop_start

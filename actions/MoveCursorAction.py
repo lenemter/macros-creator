@@ -42,9 +42,10 @@ class MoveCursorAction(Action):
             if self.move_type == 'Absolute':
                 pyautogui.moveTo(x=self.position_x, y=self.position_y, duration=self.duration)
             else:
-                pyautogui.move(x=self.position_x, y=self.position_y, duration=self.duration)
+                pyautogui.moveRel(xOffset=self.position_x, yOffset=self.position_y, duration=self.duration)
         else:
             if self.move_type == 'Absolute':
                 pyautogui.dragTo(x=self.position_x, y=self.position_y, duration=self.duration, button=self.button)
             else:
-                pyautogui.drag(x=self.position_x, y=self.position_y, duration=self.duration, button=self.button)
+                pyautogui.drag(xOffset=self.position_x, yOffset=self.position_y, duration=self.duration,
+                               button=self.button)
