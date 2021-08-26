@@ -190,13 +190,14 @@ class ActionsModel(QAbstractTableModel):
                 self._data[row] = value
                 self.dataChanged.emit(index, index)
             else:
-                print('WHY')
+                # print('WHY')
+                # It goes here while drag and drop inside the table
                 return False
             return True
         return QAbstractTableModel.setData(self, index, value, role)
 
     def flags(self, index: QModelIndex) -> Qt.ItemFlags:
-        return Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled
 
     def insertRows(self, row: int, count: int, parent: QModelIndex = ...) -> bool:
         last_inserted_row = row + count - 1
@@ -245,6 +246,19 @@ class ActionsModel(QAbstractTableModel):
 
 
 class ActionsTable(QTableView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, *kwargs)
+
+        self.setDragEnabled(True)
+        self.setAcceptDrops(True)
+        self.viewport().setAcceptDrops(True)
+        self.setDragDropOverwriteMode(False)
+        self.setDropIndicatorShown(True)
+
+        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setDragDropMode(QAbstractItemView.InternalMove)
+
     def dragEnterEvent(self, event: QDropEvent):
         if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
             event.accept()
@@ -258,7 +272,31 @@ class ActionsTable(QTableView):
             event.ignore()
 
     def dropEvent(self, event: QDropEvent) -> None:
-        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
+        if event.source() == self:
+            rows = set(self.get_selected_rows())
+            targetRow = self.indexAt(event.pos()).row()
+            rows.discard(targetRow)
+            rows = sorted(rows)
+            if not rows:
+                return None
+            if targetRow == -1:
+                targetRow = self.model().rowCount()
+            self.model().insertRows(targetRow, len(rows))
+            rowMapping = dict()  # Src row to target row.
+            for idx, row in enumerate(rows):
+                if row < targetRow:
+                    rowMapping[row] = targetRow + idx
+                else:
+                    rowMapping[row + len(rows)] = targetRow + idx
+            colCount = self.model().columnCount()
+            for srcRow, tgtRow in sorted(rowMapping.items()):
+                for col in range(0, colCount):
+                    self.model().setData(create_table_index(self.model(), tgtRow, col), self.model().actions[srcRow])
+            for row in reversed(sorted(rowMapping.keys())):
+                self.model().removeRow(row)
+            event.accept()
+
+        elif event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
             event.acceptProposedAction()
 
             source = event.source()
@@ -532,11 +570,8 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(self.actions_table)
         self.layout.setStretch(0, 0)
         self.layout.setStretch(1, 1)
-        self.actions_table.setAcceptDrops(True)
         self.actions_table.horizontalHeader().resizeSection(0, 150)
         self.actions_table.horizontalHeader().setStretchLastSection(True)
-        self.actions_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.actions_table.setSelectionMode(QAbstractItemView.ExtendedSelection)
         font = self.actions_table.horizontalHeader().font()
         font.setBold(True)
         self.actions_table.horizontalHeader().setFont(font)

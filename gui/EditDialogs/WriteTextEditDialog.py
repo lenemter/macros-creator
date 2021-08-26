@@ -13,7 +13,7 @@ class WriteTextEditDialog(EditDialog):
         self.interval_doubleSpinBox.setValue(self.action.interval)
 
     def properties(self):
-        return (self.comment_lineEdit.text(), self.text_textEdit.text(), self.amount_spinBox.value(),
+        return (self.comment_lineEdit.text(), self.text_textEdit.toPlainText(), self.amount_spinBox.value(),
                 self.interval_doubleSpinBox.value())
 
     def init_ui(self):
