@@ -16,7 +16,7 @@ class ClickAction(Action):
     name = 'Click'
     category = 'Mouse'
 
-    def __init__(self, comment='', action='Press and release', button='Left', amount=1, interval=0,
+    def __init__(self, comment='', action='Click', button='Left', amount=1, interval=0,
                  move_type='Absolute', position_x=0, position_y=0, restore_cursor=False):
         self.comment = comment
         self.action = action
@@ -55,7 +55,7 @@ class ClickAction(Action):
     def run(self):
         if self.move_type == 'Absolute':
             mouse_position = pyautogui.position()
-            if self.action == 'Press and release':
+            if self.action == 'Click':
                 pyautogui.click(x=self.position_x, y=self.position_y, clicks=self.amount, interval=self.interval,
                                 button=self.button)
             elif self.action == 'Press':

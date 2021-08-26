@@ -34,7 +34,7 @@ class ClickEditDialog(EditDialog):
             self.position_y_spinBox.setRange(-9999, 9999)
 
     def check_action(self):
-        if self.action_comboBox.currentText() != 'Press and release':
+        if self.action_comboBox.currentText() != 'Click':
             self.amount_spinBox.setDisabled(True)
         else:
             self.amount_spinBox.setDisabled(False)
@@ -60,7 +60,7 @@ class ClickEditDialog(EditDialog):
         self.action_label = QLabel('Action:')  # Label
         self.action_label.setAlignment(Qt.AlignRight)
         self.action_comboBox = QComboBox()  # ComboBox
-        self.action_comboBox.addItems(['Press and release', 'Press', 'Release'])
+        self.action_comboBox.addItems(['Click', 'Press', 'Release'])
 
         self.properties_grid.addWidget(self.action_label, 0, 0)
         self.properties_grid.addWidget(self.action_comboBox, 0, 1)
