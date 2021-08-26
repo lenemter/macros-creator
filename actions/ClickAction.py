@@ -7,11 +7,6 @@ from actions.Action import Action
 from gui.EditDialogs import ClickEditDialog
 
 
-def handle_move_type(move_type: str, position_x: int, position_y: int,
-                     mouse_position: Tuple[int, int]) -> Tuple[int, int]:
-    return x, y
-
-
 class ClickAction(Action):
     name = 'Click'
     category = 'Mouse'
