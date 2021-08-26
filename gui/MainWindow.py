@@ -191,7 +191,6 @@ class ActionsModel(QAbstractTableModel):
                 self.dataChanged.emit(index, index)
             else:
                 print('WHY')
-                # It goes here while drag and drop inside the table
                 return False
             return True
         return QAbstractTableModel.setData(self, index, value, role)
