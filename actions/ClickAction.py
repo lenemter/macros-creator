@@ -1,6 +1,5 @@
 from time import sleep
 from xml.etree import ElementTree as ET
-from typing import Tuple
 import pyautogui
 
 from actions.Action import Action
