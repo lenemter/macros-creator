@@ -1,3 +1,4 @@
+from time import sleep
 from xml.etree import ElementTree as ET
 from typing import Tuple
 import pyautogui
@@ -8,13 +9,6 @@ from gui.EditDialogs import ClickEditDialog
 
 def handle_move_type(move_type: str, position_x: int, position_y: int,
                      mouse_position: Tuple[int, int]) -> Tuple[int, int]:
-    if move_type == 'Absolute':
-        x = position_x
-        y = position_y
-    else:
-        x = mouse_position[0] + position_x
-        y = mouse_position[1] + position_y
-
     return x, y
 
 
@@ -59,16 +53,29 @@ class ClickAction(Action):
                                                 'restore_cursor': str(self.restore_cursor)})
 
     def run(self):
-        # todo: fix bug
-        mouse_position = pyautogui.position()
-        x, y = handle_move_type(self.move_type, self.position_x, self.position_y, mouse_position)
-
-        if self.action == 'Press and release':
-            pyautogui.click(x=x, y=y, clicks=self.amount, interval=self.interval, button=self.button)
-        elif self.action == 'Press':
-            pyautogui.mouseDown(x=x, y=y, button=self.button)
+        if self.move_type == 'Absolute':
+            mouse_position = pyautogui.position()
+            if self.action == 'Press and release':
+                pyautogui.click(x=self.position_x, y=self.position_y, clicks=self.amount, interval=self.interval,
+                                button=self.button)
+            elif self.action == 'Press':
+                pyautogui.mouseDown(x=self.position_x, y=self.position_y, button=self.button)
+            else:
+                pyautogui.mouseUp(x=self.position_x, y=self.position_y, button=self.button)
+            if self.restore_cursor:
+                pyautogui.moveTo(*mouse_position)
         else:
-            pyautogui.mouseUp(x=x, y=y, button=self.button)
+            for _ in range(self.amount):
+                mouse_position = pyautogui.position()
+                x = mouse_position[0] + self.position_x
+                y = mouse_position[1] + self.position_y
+                if self.action == 'Press and release':
+                    pyautogui.click(x=x, y=y, button=self.button)
+                elif self.action == 'Press':
+                    pyautogui.mouseDown(x=x, y=y, button=self.button)
+                else:
+                    pyautogui.mouseUp(x=x, y=y, button=self.button)
+                if self.restore_cursor:
+                    pyautogui.moveTo(*mouse_position)
 
-        if self.restore_cursor:
-            pyautogui.moveTo(*mouse_position)
+                sleep(self.interval)
