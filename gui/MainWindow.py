@@ -190,7 +190,7 @@ class ActionsModel(QAbstractTableModel):
                 self._data[row] = value
                 self.dataChanged.emit(index, index)
             else:
-                # print('WHY')
+                print('WHY')
                 # It goes here while drag and drop inside the table
                 return False
             return True
@@ -281,17 +281,17 @@ class ActionsTable(QTableView):
                 return None
             if targetRow == -1:
                 targetRow = self.model().rowCount()
-            self.model().insertRows(targetRow, len(rows))
             rowMapping = dict()  # Src row to target row.
+            b = targetRow - rows[0]
             for idx, row in enumerate(rows):
                 if row < targetRow:
-                    rowMapping[row] = targetRow + idx
+                    rowMapping[row] = row + b
                 else:
-                    rowMapping[row + len(rows)] = targetRow + idx
-            colCount = self.model().columnCount()
+                    rowMapping[row + len(rows)] = row + b
+            for row in rowMapping.values():
+                self.model().insertRow(row)
             for srcRow, tgtRow in sorted(rowMapping.items()):
-                for col in range(0, colCount):
-                    self.model().setData(create_table_index(self.model(), tgtRow, col), self.model().actions[srcRow])
+                self.model().setData(create_table_index(self.model(), tgtRow, 0), self.model().actions[srcRow])
             for row in reversed(sorted(rowMapping.keys())):
                 self.model().removeRow(row)
             event.accept()
@@ -306,7 +306,6 @@ class ActionsTable(QTableView):
 
             action = action_class()
             self.model().insertRow(self.model().rowCount() + 1)
-            # noinspection PyTypeChecker
             index = create_table_index(self.model(), self.model().rowCount() - 1, 0)
             self.model().setData(index, action)
             main_window = self.parent().parent()
