@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 from gui.EditDialogs.EditDialog import EditDialog
 
 
-class SleepEditDialog(EditDialog):
+class PauseEditDialog(EditDialog):
     def __init__(self, parent, action):
         super().__init__(parent, action)
 

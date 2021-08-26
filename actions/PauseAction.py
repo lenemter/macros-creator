@@ -2,11 +2,11 @@ from xml.etree import ElementTree as ET
 from time import sleep
 
 from actions.Action import Action
-from gui.EditDialogs import SleepEditDialog
+from gui.EditDialogs import PauseEditDialog
 
 
-class SleepAction(Action):
-    name = 'Sleep'
+class PauseAction(Action):
+    name = 'Pause'
     category = 'Other'
 
     def __init__(self, comment='', duration=1):
@@ -14,7 +14,7 @@ class SleepAction(Action):
         self.duration = float(duration)
 
     def open_edit_dialog(self, parent) -> bool:
-        edit_dialog = SleepEditDialog.SleepEditDialog(parent, self)
+        edit_dialog = PauseEditDialog.PauseEditDialog(parent, self)
         edit_dialog.exec_()
 
         if edit_dialog.user_clicked_ok:
