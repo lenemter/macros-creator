@@ -273,25 +273,26 @@ class ActionsTable(QTableView):
     def dropEvent(self, event: QDropEvent) -> None:
         if event.source() == self:
             rows = set(self.get_selected_rows())
-            targetRow = self.indexAt(event.pos()).row()
-            rows.discard(targetRow)
+            target_row = self.indexAt(event.pos()).row()
+            rows.discard(target_row)
             rows = sorted(rows)
             if not rows:
                 return None
-            if targetRow == -1:
-                targetRow = self.model().rowCount()
-            rowMapping = dict()  # Src row to target row.
-            b = targetRow - rows[0]
+            if target_row == -1:
+                target_row = self.model().rowCount()
+            row_mapping = dict()  # Src row to target row.
+            b = target_row - rows[0]
             for idx, row in enumerate(rows):
-                if row < targetRow:
-                    rowMapping[row] = row + b
+                if row < target_row:
+                    row_mapping[row] = row + b
                 else:
-                    rowMapping[row + len(rows)] = row + b
-            for row in rowMapping.values():
+                    row_mapping[row + len(rows)] = row + b
+            for row in row_mapping.values():
                 self.model().insertRow(row)
-            for srcRow, tgtRow in sorted(rowMapping.items()):
-                self.model().setData(create_table_index(self.model(), tgtRow, 0), self.model().actions[srcRow])
-            for row in reversed(sorted(rowMapping.keys())):
+            for srcRow, tgtRow in sorted(row_mapping.items()):
+                index = create_table_index(self.model(), tgtRow, 0)
+                self.model().setData(index, self.model().actions[srcRow])
+            for row in reversed(sorted(row_mapping.keys())):
                 self.model().removeRow(row)
             event.accept()
 
@@ -303,13 +304,19 @@ class ActionsTable(QTableView):
             index = source.currentIndex()
             action_class = source_model.data(index, Qt.UserRole)
 
-            action = action_class()
-            self.model().insertRow(self.model().rowCount() + 1)
-            index = create_table_index(self.model(), self.model().rowCount() - 1, 0)
-            self.model().setData(index, action)
-            main_window = self.parent().parent()
-            main_window.not_saved()
-            action.open_edit_dialog(main_window)
+            target_row = self.indexAt(event.pos()).row()
+            self.create_action(action_class, target_row)
+
+    def create_action(self, action_class, row=-1):
+        if row == -1:
+            row = self.model().rowCount()
+        action = action_class()
+        self.model().insertRow(row)
+        index = create_table_index(self.model(), row, 0)
+        self.model().setData(index, action)
+        main_window = self.parent().parent()
+        main_window.not_saved()
+        action.open_edit_dialog(main_window)
 
     def get_selected_rows(self):
         return list(set(index.row() for index in self.selectedIndexes()))
@@ -370,6 +377,7 @@ class MainWindow(QMainWindow):
         self.is_saved = True
 
         self.actions_table.doubleClicked.connect(self.open_action_edit_dialog)
+        self.new_action_tree.doubleClicked.connect(self.add_new_action)
         self.new_action_dock.closed.connect(self.sync_dock_and_action)
         self.action_new_action_dock.triggered.connect(self.handle_dock_state)
         self.delete_button.pressed.connect(self.delete)
@@ -390,6 +398,13 @@ class MainWindow(QMainWindow):
             was_changed = action.open_edit_dialog(self)
             if was_changed:
                 self.not_saved()
+
+    def add_new_action(self):
+        model = self.new_action_tree.model()
+        index = self.new_action_tree.currentIndex()
+        action_class = model.data(index, Qt.UserRole)
+        if type(action_class) != str:
+            self.actions_table.create_action(action_class)
 
     def delete(self):
         selected_rows = self.actions_table.get_selected_rows()
