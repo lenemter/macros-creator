@@ -12,7 +12,7 @@ class Runner(QObject):
         super().__init__()
         self.actions = actions
 
-    def close(self):
+    def close(self) -> None:
         pyautogui.FAILSAFE = True
         stderr = sys.stderr
         position = pyautogui.position()
@@ -29,7 +29,7 @@ class Runner(QObject):
         if (position.x, position.y) != (0, 0):
             pyautogui.moveTo(x=position.x, y=position.y, duration=0)
 
-    def run(self):
+    def run(self) -> None:
         sleep(1)
         i = 0
         while i < len(self.actions):
@@ -46,6 +46,6 @@ class Runner(QObject):
         self.finished.emit()
 
 
-def run(actions):
+def run(actions) -> None:
     window = StopWindow(Runner, actions)
     window.exec_()

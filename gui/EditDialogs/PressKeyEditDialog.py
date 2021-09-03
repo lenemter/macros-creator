@@ -17,20 +17,20 @@ class PressKeyEditDialog(EditDialog):
         self.action_comboBox.currentTextChanged.connect(self.check_action)
         self.amount_spinBox.valueChanged.connect(self.check_interval)
 
-    def check_action(self):
+    def check_action(self) -> None:
         if self.action_comboBox.currentText() != 'Press and release':
             self.amount_spinBox.setDisabled(True)
         else:
             self.amount_spinBox.setDisabled(False)
         self.check_interval()
 
-    def check_interval(self):
+    def check_interval(self) -> None:
         if any((self.amount_spinBox.value() == 1, not self.amount_spinBox.isEnabled())):
             self.interval_doubleSpinBox.setDisabled(True)
         else:
             self.interval_doubleSpinBox.setDisabled(False)
 
-    def properties(self):
+    def properties(self) -> tuple:
         return (self.comment_lineEdit.text(), self.key_lineEdit.text(), self.action_comboBox.currentText(),
                 self.amount_spinBox.value(), self.interval_doubleSpinBox.value())
 

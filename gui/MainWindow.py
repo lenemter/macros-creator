@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QDockWidget, QTre
 from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QDropEvent, QDragMoveEvent
 from pathlib import Path
+from typing import Optional, Any, Union
 
 from actions.Action import Action, NoneAction
 from parser import Runner, FileRead, FileWrite
@@ -37,7 +38,7 @@ class NewActionTreeNode:
         self._parent = None
         self._row = 0
 
-    def data(self, column):
+    def data(self, column) -> Optional[str]:
         if column == 0:
             if self._data is None:
                 return None
@@ -46,10 +47,10 @@ class NewActionTreeNode:
             return self._data.name
 
     @staticmethod
-    def columnCount():
+    def columnCount() -> int:
         return 1
 
-    def childCount(self):
+    def childCount(self) -> int:
         return len(self._children)
 
     def child(self, row):
@@ -59,10 +60,10 @@ class NewActionTreeNode:
     def parent(self):
         return self._parent
 
-    def row(self):
+    def row(self) -> int:
         return self._row
 
-    def addChild(self, child):
+    def addChild(self, child) -> None:
         child._parent = self
         child._row = len(self._children)
         self._children.append(child)
@@ -113,7 +114,7 @@ class NewActionTreeModel(QAbstractItemModel):
     def columnCount(self, parent: QModelIndex = ...) -> int:
         return 1
 
-    def data(self, index: QModelIndex, role: int = ...):
+    def data(self, index: QModelIndex, role: int = ...) -> Any:
         if not index.isValid():
             return None
         node = index.internalPointer()
@@ -131,7 +132,7 @@ class NewActionTreeModel(QAbstractItemModel):
         return Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled | default_flags
 
     @property
-    def root(self):
+    def root(self) -> NewActionTreeNode:
         return self._root
 
 
@@ -142,13 +143,13 @@ class BoldDelegate(QStyledItemDelegate):
         super().__init__()
         self.model = model
 
-    def paint(self, painter, option, index):
+    def paint(self, painter, option, index) -> None:
         if self.model.data(self.model.parent(index), Qt.DisplayRole) == self.model.root.data(0):
             option.font.setWeight(QFont.Bold)
         QStyledItemDelegate.paint(self, painter, option, index)
 
 
-def create_table_index(model, row, column):
+def create_table_index(model: Union[QAbstractItemModel, QAbstractTableModel], row: int, column: int) -> QModelIndex:
     return QAbstractTableModel.index(model, row, column)
 
 
@@ -165,14 +166,14 @@ class ActionsModel(QAbstractTableModel):
     def rowCount(self, parent: QModelIndex = ...) -> int:
         return len(self._data)
 
-    def headerData(self, section: int, orientation: Qt.Orientation, role: int = ...):
+    def headerData(self, section: int, orientation: Qt.Orientation, role: int = ...) -> Union[int, str]:
         if role == Qt.DisplayRole:
             if orientation == Qt.PortraitOrientation:
                 return ['Action', 'Comment'][section]
             else:
                 return section + 1
 
-    def data(self, index: QModelIndex, role: int = ...):
+    def data(self, index: QModelIndex, role: int = ...) -> Any:
         if not index.isValid():
             return None
         if role == Qt.DisplayRole:
@@ -215,7 +216,7 @@ class ActionsModel(QAbstractTableModel):
         self.endRemoveRows()
         return True
 
-    def move_up(self, rows):
+    def move_up(self, rows) -> bool:
         was_changed = False
         for row in rows:
             min_row = max((row - 1, 0))
@@ -227,7 +228,7 @@ class ActionsModel(QAbstractTableModel):
                 was_changed = True
         return was_changed
 
-    def move_down(self, rows):
+    def move_down(self, rows) -> bool:
         was_changed = False
         rows.reverse()
         for row in rows:
@@ -241,7 +242,7 @@ class ActionsModel(QAbstractTableModel):
         return was_changed
 
     @property
-    def actions(self):
+    def actions(self) -> list:
         return self._data
 
 
@@ -259,7 +260,7 @@ class ActionsTable(QTableView):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setDragDropMode(QAbstractItemView.InternalMove)
 
-    def dragEnterEvent(self, event: QDropEvent):
+    def dragEnterEvent(self, event: QDropEvent) -> None:
         if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
             event.accept()
         else:
@@ -308,7 +309,7 @@ class ActionsTable(QTableView):
             target_row = self.indexAt(event.pos()).row()
             self.create_action(action_class, target_row)
 
-    def create_action(self, action_class, row=-1):
+    def create_action(self, action_class, row=-1) -> None:
         if row == -1:
             row = self.model().rowCount()
         action = action_class()
@@ -319,10 +320,10 @@ class ActionsTable(QTableView):
         main_window.not_saved()
         action.open_edit_dialog(main_window)
 
-    def get_selected_rows(self):
+    def get_selected_rows(self) -> list:
         return list(set(index.row() for index in self.selectedIndexes()))
 
-    def move_selection_up(self):
+    def move_selection_up(self) -> None:
         selected_rows = self.get_selected_rows()
         for row in selected_rows:
             min_row = max((row - 1, 0))
@@ -332,7 +333,7 @@ class ActionsTable(QTableView):
             if row != min_row:
                 self.selectRow(min_row)
 
-    def move_selection_down(self):
+    def move_selection_down(self) -> None:
         selected_rows = self.get_selected_rows()
         selected_rows.reverse()
         for row in selected_rows:
@@ -389,11 +390,11 @@ class MainWindow(QMainWindow):
         self.action_open.triggered.connect(self.open_file)
         self.action_save.triggered.connect(self.save_file)
 
-    def run(self):
+    def run(self) -> None:
         table_actions = self.actions_table.model().actions
         Runner.run(table_actions)
 
-    def open_action_edit_dialog(self):
+    def open_action_edit_dialog(self) -> None:
         selected_rows = self.actions_table.get_selected_rows()
         if len(selected_rows) == 1:
             row = selected_rows[0]
@@ -404,34 +405,34 @@ class MainWindow(QMainWindow):
             if was_changed:
                 self.not_saved()
 
-    def add_new_action(self):
+    def add_new_action(self) -> None:
         model = self.new_action_tree.model()
         index = self.new_action_tree.currentIndex()
         action_class = model.data(index, Qt.UserRole)
         if type(action_class) != str:
             self.actions_table.create_action(action_class)
 
-    def delete(self):
+    def delete(self) -> None:
         selected_rows = self.actions_table.get_selected_rows()
         for i, row in enumerate(selected_rows):
             self.actions_table.model().removeRow(row - i)
         self.not_saved()
 
-    def move_up(self):
+    def move_up(self) -> None:
         selected_rows = self.actions_table.get_selected_rows()
         was_changed = self.actions_table.model().move_up(selected_rows)
         if was_changed:
             self.actions_table.move_selection_up()
             self.not_saved()
 
-    def move_down(self):
+    def move_down(self) -> None:
         selected_rows = self.actions_table.get_selected_rows()
         was_changed = self.actions_table.model().move_down(selected_rows)
         if was_changed:
             self.actions_table.move_selection_down()
             self.not_saved()
 
-    def not_saved(self):
+    def not_saved(self) -> None:
         if self.actions_table.model().rowCount():
             if self.opened_file != self.default_opened_file:
                 self.setWindowTitle(f'{self.opened_file}[*]')
@@ -440,13 +441,13 @@ class MainWindow(QMainWindow):
         else:
             self.saved()
 
-    def saved(self):
+    def saved(self) -> None:
         if self.opened_file != self.default_opened_file:
             self.setWindowTitle(f'{self.opened_file}[*]')
         self.setWindowModified(False)
         self.is_saved = True
 
-    def new_file(self):
+    def new_file(self) -> None:
         filename = QFileDialog.getSaveFileName(self, 'Create new file', home, '.mcrc (*.mcrc)')[0]
         if filename:
             if not self.is_saved:
@@ -467,7 +468,7 @@ class MainWindow(QMainWindow):
             self.actions_table.setModel(model)
             self.saved()
 
-    def open_file(self):
+    def open_file(self) -> None:
         filename = QFileDialog.getOpenFileName(self, 'Open file', home, '.mcrc (*.mcrc)')[0]
         if filename:
             if not self.is_saved:
@@ -487,7 +488,7 @@ class MainWindow(QMainWindow):
             self.actions_table.setModel(model)
             self.saved()
 
-    def save_file(self):
+    def save_file(self) -> Optional[int]:
         if self.opened_file == self.default_opened_file:
             filepath = QFileDialog.getSaveFileName(self, 'Create new file', home, '.mcrc (*.mcrc)')[0]
             if filepath:
@@ -500,10 +501,10 @@ class MainWindow(QMainWindow):
         FileWrite.write_file(self.opened_file, self.actions_table.model().actions)
         self.saved()
 
-    def sync_dock_and_action(self):
+    def sync_dock_and_action(self) -> None:
         self.action_new_action_dock.setChecked(self.new_action_dock.is_closed)
 
-    def handle_dock_state(self):
+    def handle_dock_state(self) -> None:
         is_checked = self.action_new_action_dock.isChecked()
         if is_checked:
             self.new_action_dock.show()

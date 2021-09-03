@@ -35,7 +35,7 @@ class ClickAction(Action):
                  self.position_y, self.restore_cursor) = properties
             return was_changed
 
-    def xml(self):
+    def xml(self) -> ET.Element:
         return ET.Element(self.get_xml_name(), {'comment': self.comment,
                                                 'action': self.action,
                                                 'button': self.button,
@@ -46,7 +46,7 @@ class ClickAction(Action):
                                                 'position_y': str(self.position_y),
                                                 'restore_cursor': str(self.restore_cursor)})
 
-    def run(self):
+    def run(self) -> None:
         if self.move_type == 'Absolute':
             mouse_position = pyautogui.position()
             if self.action == 'Click':

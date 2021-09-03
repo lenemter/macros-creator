@@ -13,18 +13,18 @@ class LoopEditDialog(EditDialog):
         self.set_loop_start_value()
         self.count_spinBox.setValue(self.action.count)
 
-    def set_loop_start_comboBox_values(self):
+    def set_loop_start_comboBox_values(self) -> None:
         for i in range(1, self.row_count + 1):
             self.loop_start_comboBox.addItem(str(i))
 
-    def set_loop_start_value(self):
+    def set_loop_start_value(self) -> None:
         old_loop_start = self.action.loop_start
         if old_loop_start > self.row_count:
             self.loop_start_comboBox.setCurrentIndex(self.row_count - 1)
         else:
             self.loop_start_comboBox.setCurrentIndex(old_loop_start - 1)
 
-    def properties(self):
+    def properties(self) -> tuple:
         try:
             loop_start = int(self.loop_start_comboBox.currentText())
         except ValueError:

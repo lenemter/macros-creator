@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import pyautogui
+import xml.etree.ElementTree as ET
 
 pyautogui.FAILSAFE = False
 
@@ -16,11 +17,11 @@ class Action(ABC):
     def open_edit_dialog(self, parent) -> bool:
         raise NotImplementedError
 
-    def get_xml_name(self):
+    def get_xml_name(self) -> str:
         return self.name.lower().replace(' ', '_')
 
     @abstractmethod
-    def xml(self):
+    def xml(self) -> ET.Element:
         raise NotImplementedError
 
     @abstractmethod

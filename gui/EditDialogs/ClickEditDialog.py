@@ -25,7 +25,7 @@ class ClickEditDialog(EditDialog):
         self.move_type_comboBox.currentTextChanged.connect(self.set_spinBoxes_ranges)
         self.amount_spinBox.valueChanged.connect(self.check_interval)
 
-    def set_spinBoxes_ranges(self):
+    def set_spinBoxes_ranges(self) -> None:
         if self.move_type_comboBox.currentText() == 'Absolute':
             self.position_x_spinBox.setRange(0, 9999)
             self.position_y_spinBox.setRange(0, 9999)
@@ -33,20 +33,20 @@ class ClickEditDialog(EditDialog):
             self.position_x_spinBox.setRange(-9999, 9999)
             self.position_y_spinBox.setRange(-9999, 9999)
 
-    def check_action(self):
+    def check_action(self) -> None:
         if self.action_comboBox.currentText() != 'Click':
             self.amount_spinBox.setDisabled(True)
         else:
             self.amount_spinBox.setDisabled(False)
         self.check_interval()
 
-    def check_interval(self):
+    def check_interval(self) -> None:
         if any((self.amount_spinBox.value() == 1, not self.amount_spinBox.isEnabled())):
             self.interval_doubleSpinBox.setDisabled(True)
         else:
             self.interval_doubleSpinBox.setDisabled(False)
 
-    def properties(self):
+    def properties(self) -> tuple:
         return (self.comment_lineEdit.text(), self.action_comboBox.currentText(), self.button_comboBox.currentText(),
                 self.amount_spinBox.value(), self.interval_doubleSpinBox.value(), self.move_type_comboBox.currentText(),
                 self.position_x_spinBox.value(), self.position_y_spinBox.value(),

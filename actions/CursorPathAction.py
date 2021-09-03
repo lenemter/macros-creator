@@ -31,14 +31,14 @@ class CursorPathAction(Action):
                 self.comment, self.move_type, self.duration, self.button, self.path = properties
             return was_changed
 
-    def xml(self):
+    def xml(self) -> ET.Element:
         return ET.Element(self.get_xml_name(), {'comment': self.comment,
                                                 'move_type': self.move_type,
                                                 'duration': str(self.duration),
                                                 'button': self.button,
                                                 'path': str(self.path)})
 
-    def run(self):
+    def run(self) -> None:
         if self.path:
             if self.button != 'None':
                 pyautogui.mouseDown(self.button)

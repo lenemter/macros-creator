@@ -28,14 +28,14 @@ class PressKeyAction(Action):
                 self.comment, self.key, self.action, self.amount, self.interval = properties
             return was_changed
 
-    def xml(self):
+    def xml(self) -> ET.Element:
         return ET.Element(self.get_xml_name(), {'comment': self.comment,
                                                 'key': self.key,
                                                 'action': self.action,
                                                 'amount': str(self.amount),
                                                 'interval': str(self.interval)})
 
-    def run(self):
+    def run(self) -> None:
         if self.action == 'Press and release':
             for _ in range(self.amount):
                 pyautogui.typewrite(self.key)

@@ -26,11 +26,11 @@ class WriteTextAction(Action):
                 self.comment, self.text, self.amount, self.interval = properties
             return was_changed
 
-    def xml(self):
+    def xml(self) -> ET.Element:
         return ET.Element(self.get_xml_name(), {'comment': self.comment,
                                                 'text': self.text,
                                                 'amount': str(self.amount),
                                                 'interval': str(self.interval)})
 
-    def run(self):
+    def run(self) -> None:
         pyautogui.typewrite(self.text * self.amount, interval=self.interval)

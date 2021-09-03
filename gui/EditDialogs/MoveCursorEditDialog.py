@@ -17,7 +17,7 @@ class MoveCursorEditDialog(EditDialog):
 
         self.move_type_comboBox.currentTextChanged.connect(self.set_spinBoxes_ranges)
 
-    def set_spinBoxes_ranges(self):
+    def set_spinBoxes_ranges(self) -> None:
         if self.move_type_comboBox.currentText() == 'Absolute':
             self.position_x_spinBox.setRange(0, 9999)
             self.position_y_spinBox.setRange(0, 9999)
@@ -25,7 +25,7 @@ class MoveCursorEditDialog(EditDialog):
             self.position_x_spinBox.setRange(-9999, 9999)
             self.position_y_spinBox.setRange(-9999, 9999)
 
-    def properties(self):
+    def properties(self) -> tuple:
         return (self.comment_lineEdit.text(), self.move_type_comboBox.currentText(), self.position_x_spinBox.value(),
                 self.position_y_spinBox.value(), self.duration_doubleSpinBox.value(), self.button_comboBox.currentText())
 

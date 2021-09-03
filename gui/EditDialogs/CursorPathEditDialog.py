@@ -18,10 +18,10 @@ class PointsTable(QTableWidget):
         self.range_state = 'Absolute'
         self.update_ranges()
 
-    def get_selected_rows(self):
+    def get_selected_rows(self) -> list:
         return list(set(item.row() for item in self.selectedIndexes()))
 
-    def update_ranges(self):
+    def update_ranges(self) -> None:
         if self.range_state == 'Absolute':
             spinbox_min = 0
         else:
@@ -32,13 +32,13 @@ class PointsTable(QTableWidget):
                 spin_box = self.cellWidget(i, j)
                 spin_box.setMinimum(spinbox_min)
 
-    def fill_table(self, points):
+    def fill_table(self, points) -> None:
         for x, y in points:
             self.add_point()
             self.cellWidget(self.rowCount() - 1, 0).setValue(x)
             self.cellWidget(self.rowCount() - 1, 1).setValue(y)
 
-    def add_point(self):
+    def add_point(self) -> None:
         self.setRowCount(self.rowCount() + 1)
 
         for i in range(self.columnCount()):
@@ -55,7 +55,7 @@ class PointsTable(QTableWidget):
             spin_box = self.cellWidget(self.rowCount() - 1, j)
             spin_box.setMinimum(spinbox_min)
 
-    def remove_point(self):
+    def remove_point(self) -> None:
         selected_rows = self.get_selected_rows()
         if not selected_rows:
             QMessageBox.information(self, 'No rows', 'No rows selected', QMessageBox.Ok)
@@ -66,7 +66,7 @@ class PointsTable(QTableWidget):
     def clear_points(self):
         self.setRowCount(0)
 
-    def get_points_list(self):
+    def get_points_list(self) -> list:
         points = []
         for i in range(self.rowCount()):
             value1 = int(self.cellWidget(i, 0).text())
@@ -93,11 +93,11 @@ class CursorPathEditDialog(EditDialog):
 
         self.move_type_comboBox.currentTextChanged.connect(self.set_table_state)
 
-    def set_table_state(self):
+    def set_table_state(self) -> None:
         self.table.range_state = self.move_type_comboBox.currentText()
         self.table.update_ranges()
 
-    def properties(self):
+    def properties(self) -> tuple:
         return (self.comment_lineEdit.text(), self.move_type_comboBox.currentText(),
                 self.duration_doubleSpinBox.value(), self.button_comboBox.currentText(), self.table.get_points_list())
 

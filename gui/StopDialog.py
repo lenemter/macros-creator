@@ -20,11 +20,11 @@ class StopWindow(QDialog):
         self.runner_thread.start()
         return super().exec_()
 
-    def close_thread(self):
+    def close_thread(self) -> None:
         self.runner.close()
         self.runner_thread.quit()
 
-    def finish(self):
+    def finish(self) -> None:
         self.runner_thread.quit()
         self.close()
 

@@ -29,7 +29,7 @@ class MoveCursorAction(Action):
                 self.comment, self.move_type, self.position_x, self.position_y, self.duration, self.button = properties
             return was_changed
 
-    def xml(self):
+    def xml(self) -> ET.Element:
         return ET.Element(self.get_xml_name(), {'comment': self.comment,
                                                 'move_type': self.move_type,
                                                 'position_x': str(self.position_x),
@@ -37,7 +37,7 @@ class MoveCursorAction(Action):
                                                 'duration': str(self.duration),
                                                 'button': self.button})
 
-    def run(self):
+    def run(self) -> None:
         if self.button == 'None':
             if self.move_type == 'Absolute':
                 pyautogui.moveTo(x=self.position_x, y=self.position_y, duration=self.duration)

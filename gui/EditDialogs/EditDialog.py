@@ -17,15 +17,15 @@ class EditDialog(QDialog):
         self.button_box.accepted.connect(self.accepted)
         self.button_box.rejected.connect(self.rejected)
 
-    def accepted(self):
+    def accepted(self) -> None:
         self.user_clicked_ok = True
         self.close()
 
-    def rejected(self):
+    def rejected(self) -> None:
         self.user_clicked_ok = False
         self.close()
 
-    def properties(self):
+    def properties(self) -> None:
         raise NotImplementedError
 
     def init_ui(self):

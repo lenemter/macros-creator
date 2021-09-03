@@ -24,9 +24,9 @@ class PauseAction(Action):
                 self.comment, self.duration = properties
             return was_changed
 
-    def xml(self):
+    def xml(self) -> ET.Element:
         return ET.Element(self.get_xml_name(), {'comment': self.comment,
                                                 'duration': str(self.duration)})
 
-    def run(self):
+    def run(self) -> None:
         sleep(self.duration)
