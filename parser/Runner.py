@@ -3,6 +3,7 @@ from gui.StopDialog import StopWindow
 import pyautogui
 from time import sleep
 import sys
+from multiprocessing import Process
 
 
 class Runner(QObject):
@@ -28,8 +29,13 @@ class Runner(QObject):
         # move cursor to previous location
         if (position.x, position.y) != (0, 0):
             pyautogui.moveTo(x=position.x, y=position.y, duration=0)
+        self._p.terminate()
 
-    def run(self) -> None:
+    def run(self):
+        self._p = Process(target=self.run_task)
+        self._p.start()
+
+    def run_task(self) -> None:
         sleep(1)
         i = 0
         while i < len(self.actions):
