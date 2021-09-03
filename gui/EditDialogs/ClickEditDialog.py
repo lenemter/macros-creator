@@ -49,7 +49,8 @@ class ClickEditDialog(EditDialog):
     def properties(self):
         return (self.comment_lineEdit.text(), self.action_comboBox.currentText(), self.button_comboBox.currentText(),
                 self.amount_spinBox.value(), self.interval_doubleSpinBox.value(), self.move_type_comboBox.currentText(),
-                self.position_x_spinBox.value(), self.position_y_spinBox.value(), int(self.restore_checkBox.isChecked()))
+                self.position_x_spinBox.value(), self.position_y_spinBox.value(),
+                int(self.restore_checkBox.isChecked()))
 
     def init_ui(self):
         super().init_ui()

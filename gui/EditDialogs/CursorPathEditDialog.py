@@ -98,8 +98,8 @@ class CursorPathEditDialog(EditDialog):
         self.table.update_ranges()
 
     def properties(self):
-        return (self.comment_lineEdit.text(), self.move_type_comboBox.currentText(), self.duration_doubleSpinBox.value(),
-                self.button_comboBox.currentText(), self.table.get_points_list())
+        return (self.comment_lineEdit.text(), self.move_type_comboBox.currentText(),
+                self.duration_doubleSpinBox.value(), self.button_comboBox.currentText(), self.table.get_points_list())
 
     def init_ui(self):
         super().init_ui()

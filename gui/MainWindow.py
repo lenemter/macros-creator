@@ -45,7 +45,8 @@ class NewActionTreeNode:
                 return self._data
             return self._data.name
 
-    def columnCount(self):
+    @staticmethod
+    def columnCount():
         return 1
 
     def childCount(self):
@@ -65,7 +66,7 @@ class NewActionTreeNode:
         child._parent = self
         child._row = len(self._children)
         self._children.append(child)
-
+    
 
 class NewActionTreeModel(QAbstractItemModel):
     """Model for new_action_tree"""
@@ -383,7 +384,7 @@ class MainWindow(QMainWindow):
         self.delete_button.pressed.connect(self.delete)
         self.move_up_button.pressed.connect(self.move_up)
         self.move_down_button.pressed.connect(self.move_down)
-        self.run_button.pressed.connect(self.run)
+        self.run_button.pressed.connect(lambda: Runner.run(self.actions_table.model().actions))
         self.action_new.triggered.connect(self.new_file)
         self.action_open.triggered.connect(self.open_file)
         self.action_save.triggered.connect(self.save_file)
@@ -425,9 +426,6 @@ class MainWindow(QMainWindow):
         if was_changed:
             self.actions_table.move_selection_down()
             self.not_saved()
-
-    def run(self):
-        Runner.run(self.actions_table.model().actions)
 
     def not_saved(self):
         if self.actions_table.model().rowCount():

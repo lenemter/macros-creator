@@ -1,5 +1,5 @@
-from xml.etree import ElementTree as ET
 from time import sleep
+from xml.etree import ElementTree as ET
 
 from actions.Action import Action
 from gui.EditDialogs import PauseEditDialog
