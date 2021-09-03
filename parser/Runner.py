@@ -1,13 +1,8 @@
-from PyQt5.QtCore import QObject, QThread, pyqtSignal
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QPushButton, QSizePolicy
+from PyQt5.QtCore import QObject, pyqtSignal
+from gui.StopDialog import StopWindow
 import pyautogui
 from time import sleep
 import sys
-
-
-def run(actions):
-    window = StopWindow(actions)
-    window.exec_()
 
 
 class Runner(QObject):
@@ -51,37 +46,6 @@ class Runner(QObject):
         self.finished.emit()
 
 
-class StopWindow(QDialog):
-    def __init__(self, actions):
-        super().__init__()
-        self.init_ui()
-        self.actions_list = actions
-
-        self.stop_button.pressed.connect(self.close_everything)
-
-        self.runner_thread = QThread()
-        self.runner = Runner(self.actions_list)
-        self.runner.moveToThread(self.runner_thread)
-        self.runner_thread.started.connect(self.runner.run)
-        self.runner.finished.connect(self.close_everything)
-
-        self.runner_thread.start()
-
-    def close_everything(self):
-        self.runner.close()
-        self.runner_thread.quit()
-        self.close()
-
-    def init_ui(self):
-        self.resize(200, 200)
-        self.setMinimumSize(200, 200)
-        self.move(0, 0)
-        self.setWindowTitle("Stop")
-
-        self.layout = QVBoxLayout()
-        self.setLayout(self.layout)
-
-        self.stop_button = QPushButton('Stop (Ctrl+Esc)')
-        self.stop_button.setShortcut('Ctrl+Esc')
-        self.stop_button.setSizePolicy(QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum))
-        self.layout.addWidget(self.stop_button)
+def run(actions):
+    window = StopWindow(Runner, actions)
+    window.exec_()
