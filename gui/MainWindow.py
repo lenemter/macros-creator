@@ -66,7 +66,7 @@ class NewActionTreeNode:
         child._parent = self
         child._row = len(self._children)
         self._children.append(child)
-    
+
 
 class NewActionTreeModel(QAbstractItemModel):
     """Model for new_action_tree"""
@@ -384,10 +384,14 @@ class MainWindow(QMainWindow):
         self.delete_button.pressed.connect(self.delete)
         self.move_up_button.pressed.connect(self.move_up)
         self.move_down_button.pressed.connect(self.move_down)
-        self.run_button.pressed.connect(lambda: Runner.run(self.actions_table.model().actions))
+        self.run_button.pressed.connect(self.run)
         self.action_new.triggered.connect(self.new_file)
         self.action_open.triggered.connect(self.open_file)
         self.action_save.triggered.connect(self.save_file)
+
+    def run(self):
+        table_actions = self.actions_table.model().actions
+        Runner.run(table_actions)
 
     def open_action_edit_dialog(self):
         selected_rows = self.actions_table.get_selected_rows()
