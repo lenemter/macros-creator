@@ -1,57 +1,46 @@
 from PyQt5.QtCore import QObject, pyqtSignal
-from gui.StopDialog import StopWindow
 import pyautogui
-from time import sleep
-import sys
-from multiprocessing import Process
+
+import actions
+import actions.Action
+from gui.StopDialog import StopWindow
 
 
 class Runner(QObject):
     finished = pyqtSignal()
 
-    def __init__(self, actions):
+    def __init__(self, actions_list):
         super().__init__()
-        self.actions = actions
+        self._actions_list = actions_list
+        self._current_action = None
+        self._stop_flag = False
 
-    def close(self) -> None:
-        pyautogui.FAILSAFE = True
-        stderr = sys.stderr
-        position = pyautogui.position()
-        while True:
-            try:
-                pyautogui.moveTo(x=0, y=0, duration=0)
-            except pyautogui.FailSafeException:
-                sys.stderr = object
-                break
-        # sys.stderr stuff for suppressing exception
-        sys.stderr = stderr
-        pyautogui.FAILSAFE = False
-        # move cursor to previous location
-        if (position.x, position.y) != (0, 0):
-            pyautogui.moveTo(x=position.x, y=position.y, duration=0)
-        self._p.terminate()
+    def stop(self) -> None:
+        self._stop_flag = True
+        self._current_action.stop()
 
-    def run(self):
-        self._p = Process(target=self.run_task)
-        self._p.start()
+    def run(self) -> None:
+        self._current_action: actions.Action.Action = actions.PauseAction.PauseAction(duration=1)
+        self._current_action.run()
 
-    def run_task(self) -> None:
-        sleep(1)
         i = 0
-        while i < len(self.actions):
+        while i < len(self._actions_list) and not self._stop_flag:
+            self._current_action = self._actions_list[i]
             try:
-                next_line = self.actions[i].run()
+                next_line = self._current_action.run()
             except pyautogui.FailSafeException:
-                # it will be closed in close()
+                # mixins.PyautoguiStopMixin handles this
                 break
+            self._current_action._stop_flag = False
             if next_line is None:
                 next_line = i + 1
             else:
                 next_line -= 1  # Convert line to index
             i = next_line
+        self._stop_flag = False
         self.finished.emit()
 
 
-def run(actions) -> None:
-    window = StopWindow(Runner, actions)
+def run(actions_list: list) -> None:
+    window = StopWindow(Runner, actions_list)
     window.exec_()

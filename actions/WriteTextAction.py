@@ -2,6 +2,7 @@ from xml.etree import ElementTree as ET
 import pyautogui
 
 from actions.Action import Action
+from . import mixins
 from gui.EditDialogs import WriteTextEditDialog
 
 
@@ -14,6 +15,8 @@ class WriteTextAction(Action):
         self.text = text
         self.amount = int(amount)
         self.interval = float(interval)
+
+        self._stop_flag = False
 
     def open_edit_dialog(self, parent) -> bool:
         edit_dialog = WriteTextEditDialog.WriteTextEditDialog(parent, self)
@@ -33,4 +36,19 @@ class WriteTextAction(Action):
                                                 'interval': str(self.interval)})
 
     def run(self) -> None:
-        pyautogui.typewrite(self.text * self.amount, interval=self.interval)
+        # It's here because at the top of the file it triggers PauseAction import
+        # and 'Other' category is becoming the first one
+        from .PauseAction import PauseAction
+
+        pause_action = PauseAction(duration=self.interval)
+        full_text = self.text * self.amount
+        # can't stop using FailSafeException
+        pyautogui.typewrite(full_text[0])
+        for char in full_text[1:]:
+            if self._stop_flag:
+                break
+            pause_action.run()
+            pyautogui.typewrite(char)
+
+    def stop(self) -> None:
+        self._stop_flag = True

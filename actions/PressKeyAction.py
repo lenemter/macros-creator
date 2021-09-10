@@ -3,10 +3,11 @@ from xml.etree import ElementTree as ET
 import pyautogui
 
 from actions.Action import Action
+from . import mixins
 from gui.EditDialogs import PressKeyEditDialog
 
 
-class PressKeyAction(Action):
+class PressKeyAction(mixins.PyautoguiStopMixin, Action):
     name = 'Press key'
     category = 'Keyboard'
 
@@ -36,10 +37,16 @@ class PressKeyAction(Action):
                                                 'interval': str(self.interval)})
 
     def run(self) -> None:
+        # It's here because at the top of the file it triggers PauseAction import
+        # and 'Other' category is becoming the first one
+        from .PauseAction import PauseAction
+
+        pause_action = PauseAction(duration=self.interval)
         if self.action == 'Press and release':
-            for _ in range(self.amount):
-                pyautogui.typewrite(self.key)
-                sleep(self.interval)
+            pyautogui.press(self.key)
+            for _ in range(self.amount - 1):
+                pyautogui.press(self.key)
+                pause_action.run()
         elif self.action == 'Press':
             pyautogui.keyDown(self.key)
         else:

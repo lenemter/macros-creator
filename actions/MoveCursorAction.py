@@ -2,10 +2,11 @@ from xml.etree import ElementTree as ET
 import pyautogui
 
 from actions.Action import Action
+from . import mixins
 from gui.EditDialogs import MoveCursorEditDialog
 
 
-class MoveCursorAction(Action):
+class MoveCursorAction(mixins.PyautoguiStopMixin, Action):
     name = 'Move cursor'
     category = 'Mouse'
 
@@ -47,5 +48,5 @@ class MoveCursorAction(Action):
             if self.move_type == 'Absolute':
                 pyautogui.dragTo(x=self.position_x, y=self.position_y, duration=self.duration, button=self.button)
             else:
-                pyautogui.drag(xOffset=self.position_x, yOffset=self.position_y, duration=self.duration,
-                               button=self.button)
+                pyautogui.dragRel(xOffset=self.position_x, yOffset=self.position_y, duration=self.duration,
+                                  button=self.button)

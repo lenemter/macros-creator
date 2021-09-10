@@ -3,29 +3,27 @@ from PyQt5.QtCore import QThread
 
 
 class StopWindow(QDialog):
-    def __init__(self, runner, actions: list):
+    def __init__(self, runner_class, actions_list: list):
         super().__init__()
         self.init_ui()
-        self.actions_list = actions
+        self.actions_list = actions_list
 
         self.stop_button.pressed.connect(self.close_thread)
 
         self.runner_thread = QThread()
-        self.runner = runner(self.actions_list)
+        self.runner = runner_class(self.actions_list)
         self.runner.moveToThread(self.runner_thread)
         self.runner_thread.started.connect(self.runner.run)
-        self.runner.finished.connect(self.finish)
+        self.runner.finished.connect(self.close_thread)
 
     def exec_(self) -> int:
         self.runner_thread.start()
         return super().exec_()
 
     def close_thread(self) -> None:
-        self.runner.close()
-        self.finish()
-
-    def finish(self) -> None:
+        self.runner.stop()
         self.runner_thread.quit()
+        self.runner_thread.wait()
         self.close()
 
     def init_ui(self):

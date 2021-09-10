@@ -2,10 +2,11 @@ from xml.etree import ElementTree as ET
 from typing import Optional
 
 from actions.Action import Action
+from . import mixins
 from gui.EditDialogs import LoopEditDialog
 
 
-class LoopAction(Action):
+class LoopAction(mixins.NoStopMixin, Action):
     name = 'Loop'
     category = 'Other'
 

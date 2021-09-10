@@ -2,10 +2,11 @@ from xml.etree import ElementTree as ET
 import pyautogui
 
 from actions.Action import Action
+from . import mixins
 from gui.EditDialogs import CursorPathEditDialog
 
 
-class CursorPathAction(Action):
+class CursorPathAction(mixins.PyautoguiStopMixin, Action):
     name = 'Cursor path'
     category = 'Mouse'
 
@@ -17,7 +18,7 @@ class CursorPathAction(Action):
         if path is None:
             path = []
         if type(path) == str:
-            path = eval(path)  # Sorry.
+            path = eval(path)  # Sorry. Wait there is actually a vulnerability # todo: fix it
         self.path = path
 
     def open_edit_dialog(self, parent) -> bool:
@@ -47,6 +48,6 @@ class CursorPathAction(Action):
                     pyautogui.moveTo(x=x, y=y, duration=self.duration)
             else:
                 for x, y in self.path:
-                    pyautogui.move(x=x, y=y, duration=self.duration)
+                    pyautogui.moveRel(x=x, y=y, duration=self.duration)
             if self.button != 'None':
                 pyautogui.mouseUp(self.button)

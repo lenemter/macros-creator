@@ -28,6 +28,10 @@ class Action(ABC):
     def run(self):
         raise NotImplementedError
 
+    @abstractmethod
+    def stop(self) -> None:
+        raise NotImplementedError
+
 
 class NoneAction:
     name = ''
