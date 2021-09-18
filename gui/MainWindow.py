@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional, Any, Union
 
 from actions.Action import Action, NoneAction
-from parser import Runner, FileRead, FileWrite
+from runner import runner, read_file, write_file
 
 home = str(Path.home())
 
@@ -392,7 +392,7 @@ class MainWindow(QMainWindow):
 
     def run(self) -> None:
         table_actions = self.actions_table.model().actions
-        Runner.run(table_actions)
+        runner.run(table_actions)
 
     def open_action_edit_dialog(self) -> None:
         selected_rows = self.actions_table.get_selected_rows()
@@ -483,7 +483,7 @@ class MainWindow(QMainWindow):
                         return None
 
             self.opened_file = filename
-            actions = FileRead.read_file(filename)
+            actions = read_file.read_file(filename)
             model = ActionsModel(actions)
             self.actions_table.setModel(model)
             self.saved()
@@ -498,7 +498,7 @@ class MainWindow(QMainWindow):
             else:
                 return 1
 
-        FileWrite.write_file(self.opened_file, self.actions_table.model().actions)
+        write_file.write_file(self.opened_file, self.actions_table.model().actions)
         self.saved()
 
     def sync_dock_and_action(self) -> None:
