@@ -1,9 +1,25 @@
 from xml.etree import ElementTree as ET
 import pyautogui
+from collections import UserList
 
 from actions.Action import Action
 from . import mixins
 from gui.EditDialogs import CursorPathEditDialog
+
+
+class Path(UserList):
+    def __init__(self, path_str=None):
+        super().__init__()
+        if path_str is None:
+            return
+        tuples = path_str.split(' ')
+        for t in tuples:
+            x, y = [int(x) for x in t.split(',')]
+            self.data.append((x, y))
+
+
+def convert(path: Path):
+    return ' '.join([f'{x},{y}' for (x, y) in path])
 
 
 class CursorPathAction(mixins.PyautoguiStopMixin, Action):
@@ -16,9 +32,9 @@ class CursorPathAction(mixins.PyautoguiStopMixin, Action):
         self.duration = float(duration)
         self.button = button
         if path is None:
-            path = []
-        if type(path) == str:
-            path = eval(path)  # Sorry. Wait there is actually a vulnerability # todo: fix it
+            path = Path()
+        elif type(path) == str:
+            path = Path(path)
         self.path = path
 
     def open_edit_dialog(self, parent) -> bool:
@@ -37,7 +53,7 @@ class CursorPathAction(mixins.PyautoguiStopMixin, Action):
                                                 'move_type': self.move_type,
                                                 'duration': str(self.duration),
                                                 'button': self.button,
-                                                'path': str(self.path)})
+                                                'path': convert(self.path)})
 
     def run(self) -> None:
         if self.path:
