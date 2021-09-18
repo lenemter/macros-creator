@@ -243,7 +243,7 @@ class ActionsModel(QAbstractTableModel):
 
     @property
     def actions(self) -> list:
-        return self._data
+        return self._data.copy()
 
 
 class ActionsTable(QTableView):
@@ -274,29 +274,39 @@ class ActionsTable(QTableView):
 
     def dropEvent(self, event: QDropEvent) -> None:
         if event.source() == self:
-            rows = set(self.get_selected_rows())
+            model = self.model()
+            rows = self.get_selected_rows()
             target_row = self.indexAt(event.pos()).row()
-            rows.discard(target_row)
-            rows = sorted(rows)
+            try:
+                rows.remove(target_row)
+            except ValueError:
+                pass
             if not rows:
                 return None
             if target_row == -1:
                 target_row = self.model().rowCount()
-            row_mapping = dict()  # Src row to target row.
+            row_mapping = dict()  # Src row to target row
             b = target_row - rows[0]
-            for idx, row in enumerate(rows):
+            max_row = model.rowCount() + len(rows)
+            for row in rows:
+                new_row = row + b
+                if row + b >= max_row:
+                    new_row -= 1
                 if row < target_row:
-                    row_mapping[row] = row + b
+                    row_mapping[row] = new_row
                 else:
-                    row_mapping[row + len(rows)] = row + b
+                    row_mapping[row + len(rows)] = new_row
             for row in row_mapping.values():
-                self.model().insertRow(row)
-            for srcRow, tgtRow in sorted(row_mapping.items()):
-                index = create_table_index(self.model(), tgtRow, 0)
-                self.model().setData(index, self.model().actions[srcRow])
-            for row in reversed(sorted(row_mapping.keys())):
-                self.model().removeRow(row)
+                model.insertRow(row)
+            for source_row, target_row in sorted(row_mapping.items()):
+                index = create_table_index(model, target_row, 0)
+                model.setData(index, model.actions[source_row])
+            for row in sorted(row_mapping.keys(), reverse=True):
+                model.removeRow(row)
             event.accept()
+
+            main_window = self.parent().parent()
+            main_window.not_saved()
 
         elif event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
             event.acceptProposedAction()
@@ -310,12 +320,13 @@ class ActionsTable(QTableView):
             self.create_action(action_class, target_row)
 
     def create_action(self, action_class, row=-1) -> None:
+        model = self.model()
         if row == -1:
-            row = self.model().rowCount()
+            row = model.rowCount()
         action = action_class()
-        self.model().insertRow(row)
-        index = create_table_index(self.model(), row, 0)
-        self.model().setData(index, action)
+        model.insertRow(row)
+        index = create_table_index(model, row, 0)
+        model.setData(index, action)
         main_window = self.parent().parent()
         main_window.not_saved()
         action.open_edit_dialog(main_window)
@@ -377,6 +388,7 @@ class MainWindow(QMainWindow):
         self.init_ui()
 
         self.is_saved = True
+        self.last_saved_actions = self.actions_table.model().actions
 
         self.actions_table.doubleClicked.connect(self.open_action_edit_dialog)
         self.new_action_tree.doubleClicked.connect(self.add_new_action)
@@ -391,8 +403,7 @@ class MainWindow(QMainWindow):
         self.action_save.triggered.connect(self.save_file)
 
     def run(self) -> None:
-        table_actions = self.actions_table.model().actions
-        runner.run(table_actions)
+        runner.run(self.actions_table.model().actions)
 
     def open_action_edit_dialog(self) -> None:
         selected_rows = self.actions_table.get_selected_rows()
@@ -433,19 +444,15 @@ class MainWindow(QMainWindow):
             self.not_saved()
 
     def not_saved(self) -> None:
-        if self.actions_table.model().rowCount():
-            if self.opened_file != self.default_opened_file:
-                self.setWindowTitle(f'{self.opened_file}[*]')
-            self.setWindowModified(True)
+        if self.actions_table.model().actions != self.last_saved_actions:
             self.is_saved = False
+            self.setWindowModified(True)
         else:
             self.saved()
 
     def saved(self) -> None:
-        if self.opened_file != self.default_opened_file:
-            self.setWindowTitle(f'{self.opened_file}[*]')
-        self.setWindowModified(False)
         self.is_saved = True
+        self.setWindowModified(False)
 
     def new_file(self) -> None:
         filename = QFileDialog.getSaveFileName(self, 'Create new file', home, '.mcrc (*.mcrc)')[0]
@@ -456,16 +463,15 @@ class MainWindow(QMainWindow):
                 if reply == QMessageBox.Cancel:
                     return None
                 if reply == QMessageBox.Save:
-                    # If user did not save the file
                     return_code = self.save_file()
-                    if return_code == 1:
+                    if return_code == 1:  # If user did not save the file
                         return None
 
-            file = open(filename, 'w')
-            file.close()
+            with open(filename, 'w') as _:
+                pass
             self.opened_file = filename
-            model = ActionsModel([])
-            self.actions_table.setModel(model)
+            self.setWindowTitle(f'{self.opened_file}[*]')
+            self.actions_table.setModel(ActionsModel([]))
             self.saved()
 
     def open_file(self) -> None:
@@ -477,28 +483,28 @@ class MainWindow(QMainWindow):
                 if reply == QMessageBox.Cancel:
                     return None
                 if reply == QMessageBox.Save:
-                    # If user did not save the file
                     return_code = self.save_file()
-                    if return_code == 1:
+                    if return_code == 1:  # If user did not save the file
                         return None
 
             self.opened_file = filename
+            self.setWindowTitle(f'{self.opened_file}[*]')
             actions = read_file.read_file(filename)
-            model = ActionsModel(actions)
-            self.actions_table.setModel(model)
+            self.actions_table.setModel(ActionsModel(actions))
             self.saved()
 
     def save_file(self) -> Optional[int]:
         if self.opened_file == self.default_opened_file:
             filepath = QFileDialog.getSaveFileName(self, 'Create new file', home, '.mcrc (*.mcrc)')[0]
             if filepath:
-                file = open(filepath, 'w')
-                file.close()
+                with open(filepath, 'w') as _:
+                    pass
                 self.opened_file = filepath
             else:
                 return 1
 
         write_file.write_file(self.opened_file, self.actions_table.model().actions)
+        self.setWindowTitle(f'{self.opened_file}[*]')
         self.saved()
 
     def sync_dock_and_action(self) -> None:
