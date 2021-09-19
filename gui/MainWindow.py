@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QDockWidget, QTreeView, QPushButton, QMenuBar, QMenu, \
-    QAction, QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox
+    QAction, QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox, \
+    QFrame
 from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QDropEvent, QDragMoveEvent
 from pathlib import Path
@@ -562,12 +563,12 @@ class MainWindow(QMainWindow):
         self.buttons_layout.setAlignment(Qt.AlignLeft)
         self.layout.addLayout(self.buttons_layout)
         button_size_policy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
-        # Delete button
-        self.delete_button = QPushButton(QIcon.fromTheme('edit-delete'), 'Delete')
-        self.delete_button.setShortcut('Del')
-        self.delete_button.setToolTip('Delete selected actions (Del)')
-        self.delete_button.setSizePolicy(button_size_policy)
-        self.buttons_layout.addWidget(self.delete_button)
+        # Run button
+        self.run_button = QPushButton(QIcon('system-run'), 'Run')
+        self.run_button.setShortcut('Ctrl+Space')
+        self.run_button.setToolTip('Run macro (Ctrl+Space)')
+        self.run_button.setSizePolicy(button_size_policy)
+        self.buttons_layout.addWidget(self.run_button)
         # Move up button
         self.move_up_button = QPushButton(QIcon('go-up'), 'Move up')
         self.move_up_button.setShortcut('Ctrl+Up')
@@ -580,12 +581,12 @@ class MainWindow(QMainWindow):
         self.move_down_button.setToolTip('Move selected actions down (Ctrl+Down)')
         self.move_down_button.setSizePolicy(button_size_policy)
         self.buttons_layout.addWidget(self.move_down_button)
-        # Run button
-        self.run_button = QPushButton(QIcon('system-run'), 'Run')
-        self.run_button.setShortcut('Ctrl+Space')
-        self.run_button.setToolTip('Run macro (Ctrl+Space)')
-        self.run_button.setSizePolicy(button_size_policy)
-        self.buttons_layout.addWidget(self.run_button)
+        # Delete button
+        self.delete_button = QPushButton(QIcon.fromTheme('edit-delete'), 'Delete')
+        self.delete_button.setShortcut('Del')
+        self.delete_button.setToolTip('Delete selected actions (Del)')
+        self.delete_button.setSizePolicy(button_size_policy)
+        self.buttons_layout.addWidget(self.delete_button)
 
         # Actions table
         self.actions_table = ActionsTable()
