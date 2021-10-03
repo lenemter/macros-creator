@@ -1,13 +1,21 @@
-from PyQt5.QtWidgets import QApplication, qApp
+from PyQt5.QtWidgets import QApplication
 from gui.MainWindow import MainWindow
+import sys
+
+
+def except_hook(cls, exception, traceback):
+    sys.__excepthook__(cls, exception, traceback)
+
+
+sys.excepthook = except_hook
 
 if __name__ == '__main__':
-    app = QApplication([])
-    qApp.setApplicationName('Macros Creator')
-    qApp.setApplicationDisplayName('Macros Creator')
-    qApp.setDesktopFileName('Macros Creator')
-    qApp.setOrganizationName('lenemter')
+    app = QApplication(sys.argv)
+    app.setApplicationName('Macros Creator')
+    app.setApplicationDisplayName('Macros Creator')
+    app.setDesktopFileName('Macros Creator')
+    app.setOrganizationName('lenemter')
     main_window = MainWindow()
     main_window.show()
 
-    app.exec_()
+    sys.exit(app.exec_())

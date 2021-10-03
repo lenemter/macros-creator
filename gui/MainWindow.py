@@ -1,15 +1,17 @@
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QDockWidget, QTreeView, QPushButton, QMenuBar, QMenu, \
-    QAction, QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox, \
-    QFrame
+    QAction, QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox
 from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QDropEvent, QDragMoveEvent
 from pathlib import Path
 from typing import Optional, Any, Union
+import platform
 
 from actions.Action import Action, NoneAction
 from runner import runner, read_file, write_file
+from .icons_handler import get_icon_path, get_action_icon
 
 home = str(Path.home())
+system = platform.system()
 
 
 class CloseDockWidget(QDockWidget):
@@ -121,6 +123,11 @@ class NewActionTreeModel(QAbstractItemModel):
         node = index.internalPointer()
         if role == Qt.DisplayRole:
             return node.data(index.column())
+        if role == Qt.DecorationRole:
+            if not isinstance(node._data, str):
+                if system == 'Linux':
+                    return QIcon.fromTheme(get_action_icon(node._data))
+                return QIcon(get_icon_path(get_action_icon(node._data)))
         if role == Qt.UserRole:
             return node._data
         return None
@@ -144,7 +151,7 @@ class BoldDelegate(QStyledItemDelegate):
         super().__init__()
         self.model = model
 
-    def paint(self, painter, option, index) -> None:
+    def paint(self, painter, option, index):
         if self.model.data(self.model.parent(index), Qt.DisplayRole) == self.model.root.data(0):
             option.font.setWeight(QFont.Bold)
         QStyledItemDelegate.paint(self, painter, option, index)
@@ -261,19 +268,19 @@ class ActionsTable(QTableView):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setDragDropMode(QAbstractItemView.InternalMove)
 
-    def dragEnterEvent(self, event: QDropEvent) -> None:
+    def dragEnterEvent(self, event: QDropEvent):
         if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
             event.accept()
         else:
             event.ignore()
 
-    def dragMoveEvent(self, event: QDragMoveEvent) -> None:
+    def dragMoveEvent(self, event: QDragMoveEvent):
         if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
             event.accept()
         else:
             event.ignore()
 
-    def dropEvent(self, event: QDropEvent) -> None:
+    def dropEvent(self, event: QDropEvent):
         if event.source() == self:
             model = self.model()
             rows = self.get_selected_rows()
@@ -320,7 +327,7 @@ class ActionsTable(QTableView):
             target_row = self.indexAt(event.pos()).row()
             self.create_action(action_class, target_row)
 
-    def create_action(self, action_class, row=-1) -> None:
+    def create_action(self, action_class, row=-1):
         model = self.model()
         if row == -1:
             row = model.rowCount()
@@ -335,7 +342,7 @@ class ActionsTable(QTableView):
     def get_selected_rows(self) -> list:
         return list(set(index.row() for index in self.selectedIndexes()))
 
-    def move_selection_up(self) -> None:
+    def move_selection_up(self):
         selected_rows = self.get_selected_rows()
         for row in selected_rows:
             min_row = max((row - 1, 0))
@@ -345,7 +352,7 @@ class ActionsTable(QTableView):
             if row != min_row:
                 self.selectRow(min_row)
 
-    def move_selection_down(self) -> None:
+    def move_selection_down(self):
         selected_rows = self.get_selected_rows()
         selected_rows.reverse()
         for row in selected_rows:
@@ -395,10 +402,10 @@ class MainWindow(QMainWindow):
         self.new_action_tree.doubleClicked.connect(self.add_new_action)
         self.new_action_dock.closed.connect(self.sync_dock_and_action)
         self.action_new_action_dock.triggered.connect(self.handle_dock_state)
-        self.delete_button.pressed.connect(self.delete)
-        self.move_up_button.pressed.connect(self.move_up)
-        self.move_down_button.pressed.connect(self.move_down)
-        self.run_button.pressed.connect(self.run)
+        self.delete_button.clicked.connect(self.delete)
+        self.move_up_button.clicked.connect(self.move_up)
+        self.move_down_button.clicked.connect(self.move_down)
+        self.run_button.clicked.connect(self.run)
         self.action_new.triggered.connect(self.new_file)
         self.action_open.triggered.connect(self.open_file)
         self.action_save.triggered.connect(self.save_file)
@@ -564,19 +571,19 @@ class MainWindow(QMainWindow):
         self.layout.addLayout(self.buttons_layout)
         button_size_policy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
         # Run button
-        self.run_button = QPushButton(QIcon('system-run'), 'Run')
+        self.run_button = QPushButton(QIcon.fromTheme('system-run'), 'Run')
         self.run_button.setShortcut('Ctrl+Space')
         self.run_button.setToolTip('Run macro (Ctrl+Space)')
         self.run_button.setSizePolicy(button_size_policy)
         self.buttons_layout.addWidget(self.run_button)
         # Move up button
-        self.move_up_button = QPushButton(QIcon('go-up'), 'Move up')
+        self.move_up_button = QPushButton(QIcon.fromTheme('go-up'), 'Move up')
         self.move_up_button.setShortcut('Ctrl+Up')
         self.move_up_button.setToolTip('Move selected actions up (Ctrl+Up)')
         self.move_up_button.setSizePolicy(button_size_policy)
         self.buttons_layout.addWidget(self.move_up_button)
         # Move down button
-        self.move_down_button = QPushButton(QIcon('go-down'), 'Move down')
+        self.move_down_button = QPushButton(QIcon.fromTheme('go-down'), 'Move down')
         self.move_down_button.setShortcut('Ctrl+Down')
         self.move_down_button.setToolTip('Move selected actions down (Ctrl+Down)')
         self.move_down_button.setSizePolicy(button_size_policy)
@@ -627,3 +634,10 @@ class MainWindow(QMainWindow):
         self.action_new_action_dock.setCheckable(True)
         self.action_new_action_dock.setChecked(True)
         self.menu_windows.addAction(self.action_new_action_dock)
+
+        # Setup icons for Windows and MacOS
+        if system != 'Linux':
+            self.run_button.setIcon(QIcon(get_icon_path('icons/system-run.svg')))
+            self.move_up_button.setIcon(QIcon(get_icon_path('icons/go-up.svg')))
+            self.move_down_button.setIcon(QIcon(get_icon_path('icons/go-down.svg')))
+            self.delete_button.setIcon(QIcon(get_icon_path('icons/edit-delete.svg')))

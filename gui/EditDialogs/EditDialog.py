@@ -1,8 +1,13 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QDialogButtonBox, QSpacerItem, \
-    QSizePolicy, QGridLayout
+    QSizePolicy, QGridLayout, QFrame
 from PyQt5.QtCore import Qt
 
-from gui.Widgets import HorizontalLine
+
+class HorizontalLine(QFrame):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setFrameShape(QFrame.HLine)
+        self.setFrameShadow(QFrame.Sunken)
 
 
 class EditDialog(QDialog):

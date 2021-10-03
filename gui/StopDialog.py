@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QSizePolicy, QPushButton
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QThread, Qt
 
 
 class StopWindow(QDialog):
@@ -8,7 +8,7 @@ class StopWindow(QDialog):
         self.init_ui()
         self.actions_list = actions_list
 
-        self.stop_button.pressed.connect(self.close_thread)
+        self.stop_button.clicked.connect(self.close_thread)
 
         self.runner_thread = QThread()
         self.runner = runner_class(self.actions_list)
@@ -16,21 +16,21 @@ class StopWindow(QDialog):
         self.runner_thread.started.connect(self.runner.run)
         self.runner.finished.connect(self.close_thread)
 
-    def exec_(self) -> int:
+    def exec_(self):
         self.runner_thread.start()
         return super().exec_()
 
-    def close_thread(self) -> None:
+    def close_thread(self):
         self.runner.stop()
         self.runner_thread.quit()
         self.runner_thread.wait()
         self.close()
 
     def init_ui(self):
-        self.resize(200, 200)
+        self.setGeometry(0, 0, 200, 200)
         self.setMinimumSize(200, 200)
-        self.move(0, 0)
         self.setWindowTitle("Stop")
+        self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
 
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)

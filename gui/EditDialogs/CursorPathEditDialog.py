@@ -87,9 +87,9 @@ class CursorPathEditDialog(EditDialog):
         self.button_comboBox.setCurrentText(self.action.button)
         self.table.fill_table(self.action.path)
 
-        self.add_point_button.pressed.connect(self.table.add_point)
-        self.remove_point_button.pressed.connect(self.table.remove_point)
-        self.clear_points_button.pressed.connect(self.table.clear_points)
+        self.add_point_button.clicked.connect(self.table.add_point)
+        self.remove_point_button.clicked.connect(self.table.remove_point)
+        self.clear_points_button.clicked.connect(self.table.clear_points)
 
         self.move_type_comboBox.currentTextChanged.connect(self.set_table_state)
 
