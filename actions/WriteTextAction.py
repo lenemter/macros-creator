@@ -2,7 +2,6 @@ from xml.etree import ElementTree as ET
 import pyautogui
 
 from actions.Action import Action
-from . import mixins
 from gui.EditDialogs import WriteTextEditDialog
 
 

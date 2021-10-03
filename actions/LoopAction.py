@@ -2,11 +2,10 @@ from xml.etree import ElementTree as ET
 from typing import Optional
 
 from actions.Action import Action
-from . import mixins
 from gui.EditDialogs import LoopEditDialog
 
 
-class LoopAction(mixins.NoStopMixin, Action):
+class LoopAction(Action):
     name = 'Loop'
     category = 'Other'
 
@@ -15,6 +14,7 @@ class LoopAction(mixins.NoStopMixin, Action):
         self.loop_start = int(loop_start)
         self.count = int(count)
         self._count = self.count
+        self._stop_flag = False
 
     def open_edit_dialog(self, parent) -> bool:
         edit_dialog = LoopEditDialog.LoopEditDialog(parent, self)
@@ -33,8 +33,11 @@ class LoopAction(mixins.NoStopMixin, Action):
                                                 'count': str(self.count)})
 
     def run(self) -> Optional[int]:
-        if self._count == 0:
+        if self._count == 0 or self._stop_flag:
             self._count = self.count
             return None
         self._count -= 1
         return self.loop_start
+
+    def stop(self):
+        self._stop_flag = True

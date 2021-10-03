@@ -20,9 +20,3 @@ class PyautoguiStopMixin:
         # move cursor to previous location
         if (position.x, position.y) != (0, 0):
             pyautogui.moveTo(x=position.x, y=position.y, duration=0)
-
-
-class NoStopMixin:
-    @staticmethod
-    def stop() -> None:
-        pass

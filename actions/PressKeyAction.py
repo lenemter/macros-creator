@@ -1,4 +1,3 @@
-from time import sleep
 from xml.etree import ElementTree as ET
 import pyautogui
 
