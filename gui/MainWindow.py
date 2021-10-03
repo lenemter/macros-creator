@@ -7,7 +7,7 @@ from typing import Optional, Any, Union
 import platform
 
 from actions.Action import Action, NoneAction
-from runner import runner, read_file, write_file
+import runner
 from .icons_handler import get_icon_path, get_action_icon
 
 home = str(Path.home())
@@ -497,7 +497,7 @@ class MainWindow(QMainWindow):
 
             self.opened_file = filename
             self.setWindowTitle(f'{self.opened_file}[*]')
-            actions = read_file.read_file(filename)
+            actions = runner.read_file(filename)
             self.actions_table.setModel(ActionsModel(actions))
             self.saved()
 
@@ -511,7 +511,7 @@ class MainWindow(QMainWindow):
             else:
                 return 1
 
-        write_file.write_file(self.opened_file, self.actions_table.model().actions)
+        runner.write_file(self.opened_file, self.actions_table.model().actions)
         self.setWindowTitle(f'{self.opened_file}[*]')
         self.saved()
 
