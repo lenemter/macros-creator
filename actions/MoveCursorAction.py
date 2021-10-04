@@ -38,7 +38,7 @@ class MoveCursorAction(mixins.PyautoguiStopMixin, Action):
                                                 'duration': str(self.duration),
                                                 'button': self.button})
 
-    def run(self) -> None:
+    def run(self):
         if self.button == 'None':
             if self.move_type == 'Absolute':
                 pyautogui.moveTo(x=self.position_x, y=self.position_y, duration=self.duration)

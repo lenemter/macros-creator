@@ -5,6 +5,8 @@ import pyautogui
 from PyQt5.QtCore import QObject, pyqtSignal
 from gui.StopDialog import StopWindow
 
+# Read file ---
+
 name_class_dict = dict()
 for cls in actions.Action.Action.__subclasses__():
     name_class_dict[cls.name] = cls
@@ -23,6 +25,8 @@ def read_file(filepath: str) -> list:
     return actions
 
 
+# Write file ---
+
 def write_file(path: str, actions: list):
     write_file_xml(path, actions)
 
@@ -34,6 +38,8 @@ def write_file_xml(path: str, actions: list):
     tree = ET.ElementTree(root)
     tree.write(path)
 
+
+# Run ---
 
 def run(actions_list: list):
     window = StopWindow(Runner, actions_list)
@@ -54,10 +60,10 @@ class Runner(QObject):
         self._current_action.stop()
 
     def run(self):
-        self._current_action: actions.Action.Action = actions.PauseAction.PauseAction(duration=1)
+        self._current_action = actions.PauseAction.PauseAction(duration=1)
         self._current_action.run()
 
-        i = 0
+        i = 0  # current action index
         while i < len(self._actions_list) and not self._stop_flag:
             self._current_action = self._actions_list[i]
             try:

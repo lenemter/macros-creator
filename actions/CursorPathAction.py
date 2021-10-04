@@ -55,7 +55,7 @@ class CursorPathAction(mixins.PyautoguiStopMixin, Action):
                                                 'button': self.button,
                                                 'path': convert(self.path)})
 
-    def run(self) -> None:
+    def run(self):
         if self.path:
             if self.button != 'None':
                 pyautogui.mouseDown(self.button)

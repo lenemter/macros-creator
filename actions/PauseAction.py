@@ -29,7 +29,7 @@ class PauseAction(Action):
         return ET.Element(self.get_xml_name(), {'comment': self.comment,
                                                 'duration': str(self.duration)})
 
-    def run(self) -> None:
+    def run(self):
         for _ in range(int(self.duration // 0.25)):
             if self._stop_flag:
                 return None
@@ -39,5 +39,5 @@ class PauseAction(Action):
             return None
         time.sleep(self.duration % 0.25)
 
-    def stop(self) -> None:
+    def stop(self):
         self._stop_flag = True

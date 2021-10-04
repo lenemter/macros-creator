@@ -3,12 +3,11 @@ import pyautogui
 
 
 class PyautoguiStopMixin:
-    def stop(self) -> None:
+    def stop(self):
         self._stop_flag = True
         pyautogui.FAILSAFE = True
-        stderr = sys.stderr
+        stderr = sys.stderr  # sys.stderr stuff for suppressing exception
         position = pyautogui.position()
-        # sys.stderr stuff for suppressing exception
         while True:
             try:
                 pyautogui.moveTo(x=0, y=0, duration=0)

@@ -34,20 +34,19 @@ class WriteTextAction(Action):
                                                 'amount': str(self.amount),
                                                 'interval': str(self.interval)})
 
-    def run(self) -> None:
-        # It's here because at the top of the file it triggers PauseAction import
+    def run(self):
+        # Import is here because at the top of the file it triggers PauseAction import
         # and 'Other' category is becoming the first one
         from .PauseAction import PauseAction
 
         pause_action = PauseAction(duration=self.interval)
         full_text = self.text * self.amount
         # can't stop using FailSafeException
-        pyautogui.typewrite(full_text[0])
-        for char in full_text[1:]:
+        for char in full_text:
             if self._stop_flag:
                 break
             pause_action.run()
             pyautogui.typewrite(char)
 
-    def stop(self) -> None:
+    def stop(self):
         self._stop_flag = True

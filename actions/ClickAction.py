@@ -48,13 +48,13 @@ class ClickAction(mixins.PyautoguiStopMixin, Action):
                                                 'position_y': str(self.position_y),
                                                 'restore_cursor': str(self.restore_cursor)})
 
-    def run(self) -> None:
+    def run(self):
         if self.move_type == 'Absolute':
             self.__click_move_absolute()
         else:
             self.__click_move_relative()
 
-    def __click_move_absolute(self) -> None:
+    def __click_move_absolute(self):
         if self.restore_cursor:
             mouse_position = pyautogui.position()
         if self.action == 'Click':
@@ -67,7 +67,7 @@ class ClickAction(mixins.PyautoguiStopMixin, Action):
         if self.restore_cursor:
             pyautogui.moveTo(x=mouse_position.x, y=mouse_position.y)
 
-    def __click_move_relative(self) -> None:
+    def __click_move_relative(self):
         # Import is here because at the top of the file it triggers PauseAction import
         # and 'Other' category is becoming the first one
         from .PauseAction import PauseAction

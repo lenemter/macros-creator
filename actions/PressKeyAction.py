@@ -35,8 +35,8 @@ class PressKeyAction(mixins.PyautoguiStopMixin, Action):
                                                 'amount': str(self.amount),
                                                 'interval': str(self.interval)})
 
-    def run(self) -> None:
-        # It's here because at the top of the file it triggers PauseAction import
+    def run(self):
+        # Import is here because at the top of the file it triggers PauseAction import
         # and 'Other' category is becoming the first one
         from .PauseAction import PauseAction
 
