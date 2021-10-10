@@ -12,7 +12,11 @@ for cls in actions.Action.Action.__subclasses__():
     name_class_dict[cls.name] = cls
 
 
-def read_file(filepath: str) -> list:
+def read_file(filepath: str):
+    read_file_xml(filepath)
+
+
+def read_file_xml(filepath: str) -> list:
     actions = []
     tree = ET.parse(filepath)
     root = tree.getroot()
