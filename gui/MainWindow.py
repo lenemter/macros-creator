@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QDockWidget, QTreeView, QPushButton, QMenuBar, QMenu, \
-    QAction, QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox
+    QAction, QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox, \
+    QSpacerItem
 from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QDropEvent, QDragMoveEvent
 from pathlib import Path
@@ -10,8 +11,8 @@ from actions.Action import Action, NoneAction
 import runner
 from .icons_handler import get_icon_path, get_action_icon
 
-home = str(Path.home())
-system = platform.system()
+HOME = str(Path.home())
+SYSTEM = platform.system()
 
 
 class CloseDockWidget(QDockWidget):
@@ -125,7 +126,7 @@ class NewActionTreeModel(QAbstractItemModel):
             return node.data(index.column())
         if role == Qt.DecorationRole:
             if not isinstance(node._data, str):
-                if system == 'Linux':
+                if SYSTEM == 'Linux':
                     return QIcon.fromTheme(get_action_icon(node._data))
                 return QIcon(get_icon_path(get_action_icon(node._data)))
         if role == Qt.UserRole:
@@ -463,7 +464,7 @@ class MainWindow(QMainWindow):
         self.setWindowModified(False)
 
     def new_file(self) -> None:
-        filename = QFileDialog.getSaveFileName(self, 'Create new file', home, '.mcrc (*.mcrc)')[0]
+        filename = QFileDialog.getSaveFileName(self, 'Create new file', HOME, '.mcrc (*.mcrc)')[0]
         if filename:
             if not self.is_saved:
                 reply = QMessageBox.warning(self, 'Save changes', 'Do you want to save your changes?',
@@ -483,7 +484,7 @@ class MainWindow(QMainWindow):
             self.saved()
 
     def open_file(self) -> None:
-        filename = QFileDialog.getOpenFileName(self, 'Open file', home, '.mcrc (*.mcrc)')[0]
+        filename = QFileDialog.getOpenFileName(self, 'Open file', HOME, '.mcrc (*.mcrc)')[0]
         if filename:
             if not self.is_saved:
                 reply = QMessageBox.warning(self, 'Save changes', 'Do you want to save your changes?',
@@ -503,7 +504,7 @@ class MainWindow(QMainWindow):
 
     def save_file(self) -> Optional[int]:
         if self.opened_file == self.default_opened_file:
-            filepath = QFileDialog.getSaveFileName(self, 'Create new file', home, '.mcrc (*.mcrc)')[0]
+            filepath = QFileDialog.getSaveFileName(self, 'Create new file', HOME, '.mcrc (*.mcrc)')[0]
             if filepath:
                 with open(filepath, 'w') as _:
                     pass
@@ -565,7 +566,7 @@ class MainWindow(QMainWindow):
 
         # Buttons layout
         self.buttons_layout = QHBoxLayout()
-        self.buttons_layout.setContentsMargins(0, 4, 0, 0)
+        self.buttons_layout.setContentsMargins(0, 4, 5, 0)
         self.buttons_layout.setSpacing(4)
         self.buttons_layout.setAlignment(Qt.AlignLeft)
         self.layout.addLayout(self.buttons_layout)
@@ -594,6 +595,14 @@ class MainWindow(QMainWindow):
         self.delete_button.setToolTip('Delete selected actions (Del)')
         self.delete_button.setSizePolicy(button_size_policy)
         self.buttons_layout.addWidget(self.delete_button)
+        # Spacer
+        self.vertical_spacer = QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.buttons_layout.addItem(self.vertical_spacer)
+        # Settings button
+        self.settings_button = QPushButton(QIcon.fromTheme('configure'), '')
+        self.settings_button.setToolTip('Settings')
+        self.settings_button.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
+        self.buttons_layout.addWidget(self.settings_button)
 
         # Actions table
         self.actions_table = ActionsTable()
@@ -636,7 +645,7 @@ class MainWindow(QMainWindow):
         self.menu_windows.addAction(self.action_new_action_dock)
 
         # Setup icons for Windows and MacOS
-        if system != 'Linux':
+        if SYSTEM != 'Linux':
             self.run_button.setIcon(QIcon(get_icon_path('icons/system-run.svg')))
             self.move_up_button.setIcon(QIcon(get_icon_path('icons/go-up.svg')))
             self.move_down_button.setIcon(QIcon(get_icon_path('icons/go-down.svg')))
