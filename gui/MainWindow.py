@@ -1,36 +1,16 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QDockWidget, QTreeView, QPushButton, QMenuBar, QMenu, \
-    QAction, QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox, \
-    QSpacerItem
-from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, pyqtSignal
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTreeView, QPushButton, QMenuBar, QMenu, QAction, \
+    QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox, QSpacerItem
+from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, QSize
 from PyQt5.QtGui import QFont, QIcon, QDropEvent, QDragMoveEvent
 from pathlib import Path
 from typing import Optional, Any, Union
-import platform
 
 from actions.Action import Action, NoneAction
 import runner
+from .SettingsDialog import SettingsDialog
 from .icons_handler import get_icon_path, get_action_icon
 
 HOME = str(Path.home())
-SYSTEM = platform.system()
-
-
-class CloseDockWidget(QDockWidget):
-    closed = pyqtSignal()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.is_closed = False
-
-    def closeEvent(self, event) -> None:
-        self.closed.emit()
-        self.is_closed = True
-        super().closeEvent(event)
-
-    def show(self) -> None:
-        self.closed.emit()
-        self.is_closed = False
-        super().show()
 
 
 class NewActionTreeNode:
@@ -126,8 +106,6 @@ class NewActionTreeModel(QAbstractItemModel):
             return node.data(index.column())
         if role == Qt.DecorationRole:
             if not isinstance(node._data, str):
-                if SYSTEM == 'Linux':
-                    return QIcon.fromTheme(get_action_icon(node._data))
                 return QIcon(get_icon_path(get_action_icon(node._data)))
         if role == Qt.UserRole:
             return node._data
@@ -156,6 +134,9 @@ class BoldDelegate(QStyledItemDelegate):
         if self.model.data(self.model.parent(index), Qt.DisplayRole) == self.model.root.data(0):
             option.font.setWeight(QFont.Bold)
         QStyledItemDelegate.paint(self, painter, option, index)
+
+    def sizeHint(self, option, index: QModelIndex) -> QSize:
+        return QSize(100, 24)
 
 
 def create_table_index(model: Union[QAbstractItemModel, QAbstractTableModel], row: int, column: int) -> QModelIndex:
@@ -390,6 +371,7 @@ def create_action_tree_items() -> list:
 
 
 class MainWindow(QMainWindow):
+    # noinspection PyUnresolvedReferences
     def __init__(self):
         super().__init__()
         self.default_opened_file = 'untitled.mcrc[*]'
@@ -397,22 +379,22 @@ class MainWindow(QMainWindow):
         self.init_ui()
 
         self.is_saved = True
+        self.settings = {}
         self.last_saved_actions = self.actions_table.model().actions
 
         self.actions_table.doubleClicked.connect(self.open_action_edit_dialog)
         self.new_action_tree.doubleClicked.connect(self.add_new_action)
-        self.new_action_dock.closed.connect(self.sync_dock_and_action)
-        self.action_new_action_dock.triggered.connect(self.handle_dock_state)
         self.delete_button.clicked.connect(self.delete)
         self.move_up_button.clicked.connect(self.move_up)
         self.move_down_button.clicked.connect(self.move_down)
         self.run_button.clicked.connect(self.run)
+        self.settings_button.clicked.connect(self.open_settings_dialog)
         self.action_new.triggered.connect(self.new_file)
         self.action_open.triggered.connect(self.open_file)
         self.action_save.triggered.connect(self.save_file)
 
     def run(self) -> None:
-        runner.run(self.actions_table.model().actions)
+        runner.run(self.actions_table.model().actions.copy(), self.settings.copy())
 
     def open_action_edit_dialog(self) -> None:
         selected_rows = self.actions_table.get_selected_rows()
@@ -452,6 +434,11 @@ class MainWindow(QMainWindow):
             self.actions_table.move_selection_down()
             self.not_saved()
 
+    def open_settings_dialog(self):
+        dialog = SettingsDialog(self, self.settings)
+        dialog.exec()
+        self.settings = dialog.get_settings()
+
     def not_saved(self) -> None:
         if self.actions_table.model().actions != self.last_saved_actions:
             self.is_saved = False
@@ -484,7 +471,7 @@ class MainWindow(QMainWindow):
             self.saved()
 
     def open_file(self) -> None:
-        filename = QFileDialog.getOpenFileName(self, 'Open file', HOME, '.mcrc (*.mcrc)')[0]
+        filename = QFileDialog.getOpenFileName(self, 'Open file', HOME, '.mcrc (*.mcrc); All files (*)')[0]
         if filename:
             if not self.is_saved:
                 reply = QMessageBox.warning(self, 'Save changes', 'Do you want to save your changes?',
@@ -498,7 +485,7 @@ class MainWindow(QMainWindow):
 
             self.opened_file = filename
             self.setWindowTitle(f'{self.opened_file}[*]')
-            actions = runner.read_file(filename)
+            actions, self.settings = runner.read_file(filename)
             self.actions_table.setModel(ActionsModel(actions))
             self.saved()
 
@@ -512,19 +499,9 @@ class MainWindow(QMainWindow):
             else:
                 return 1
 
-        runner.write_file(self.opened_file, self.actions_table.model().actions)
+        runner.write_file(self.opened_file, self.actions_table.model().actions, settings=self.settings)
         self.setWindowTitle(f'{self.opened_file}[*]')
         self.saved()
-
-    def sync_dock_and_action(self) -> None:
-        self.action_new_action_dock.setChecked(self.new_action_dock.is_closed)
-
-    def handle_dock_state(self) -> None:
-        is_checked = self.action_new_action_dock.isChecked()
-        if is_checked:
-            self.new_action_dock.show()
-        else:
-            self.new_action_dock.close()
 
     def init_ui(self):
         self.setWindowTitle(self.opened_file)
@@ -535,28 +512,21 @@ class MainWindow(QMainWindow):
         self.centralWidget = QWidget()
         self.setCentralWidget(self.centralWidget)
 
-        self.layout = QVBoxLayout()
-        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout = QHBoxLayout()
+        self.layout.setObjectName('main_layout')
+        self.layout.setContentsMargins(4, 4, 4, 4)
         self.layout.setSpacing(4)
         self.centralWidget.setLayout(self.layout)
 
-        # New action dock
-        self.new_action_dock = CloseDockWidget('New action')
-        self.new_action_dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.new_action_dock)
-        # New action dock content
-        self.new_action_dock_content = QWidget()
-        self.new_action_dock.setWidget(self.new_action_dock_content)
         # New action layout
         self.new_action_layout = QVBoxLayout()
         self.new_action_layout.setContentsMargins(0, 0, 0, 0)
-        self.new_action_dock_content.setLayout(self.new_action_layout)
+        self.layout.addLayout(self.new_action_layout)
 
         # New action tree
         self.new_action_tree = QTreeView()
         self.new_action_layout.addWidget(self.new_action_tree)
         self.new_action_tree.setHeaderHidden(True)
-        self.new_action_tree.setRootIsDecorated(False)
         self.new_action_tree.setDragDropMode(QAbstractItemView.DragOnly)
         items = create_action_tree_items()
         model = NewActionTreeModel(items)
@@ -564,51 +534,56 @@ class MainWindow(QMainWindow):
         self.new_action_tree.setItemDelegate(BoldDelegate(model))
         self.new_action_tree.expandAll()
 
+        # Right layout
+        self.right_layout = QVBoxLayout()
+        self.right_layout.setContentsMargins(0, 0, 0, 0)
+        self.right_layout.setSpacing(4)
+        self.layout.addLayout(self.right_layout)
+
         # Buttons layout
         self.buttons_layout = QHBoxLayout()
-        self.buttons_layout.setContentsMargins(0, 4, 5, 0)
-        self.buttons_layout.setSpacing(4)
+        self.buttons_layout.setContentsMargins(0, 0, 0, 0)
+        self.buttons_layout.setObjectName('buttons_layout')
         self.buttons_layout.setAlignment(Qt.AlignLeft)
-        self.layout.addLayout(self.buttons_layout)
-        button_size_policy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
+        self.right_layout.addLayout(self.buttons_layout)
+        button_size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         # Run button
-        self.run_button = QPushButton(QIcon.fromTheme('system-run'), 'Run')
+        self.run_button = QPushButton(QIcon(get_icon_path('icons/system-run.svg')), 'Run')
         self.run_button.setShortcut('Ctrl+Space')
         self.run_button.setToolTip('Run macro (Ctrl+Space)')
         self.run_button.setSizePolicy(button_size_policy)
         self.buttons_layout.addWidget(self.run_button)
         # Move up button
-        self.move_up_button = QPushButton(QIcon.fromTheme('go-up'), 'Move up')
+        self.move_up_button = QPushButton(QIcon(get_icon_path('icons/go-up.svg')), 'Move up')
         self.move_up_button.setShortcut('Ctrl+Up')
         self.move_up_button.setToolTip('Move selected actions up (Ctrl+Up)')
         self.move_up_button.setSizePolicy(button_size_policy)
         self.buttons_layout.addWidget(self.move_up_button)
         # Move down button
-        self.move_down_button = QPushButton(QIcon.fromTheme('go-down'), 'Move down')
+        self.move_down_button = QPushButton(QIcon(get_icon_path('icons/go-down.svg')), 'Move down')
         self.move_down_button.setShortcut('Ctrl+Down')
         self.move_down_button.setToolTip('Move selected actions down (Ctrl+Down)')
         self.move_down_button.setSizePolicy(button_size_policy)
         self.buttons_layout.addWidget(self.move_down_button)
         # Delete button
-        self.delete_button = QPushButton(QIcon.fromTheme('edit-delete'), 'Delete')
+        self.delete_button = QPushButton(QIcon(get_icon_path('icons/edit-delete.svg')), 'Delete')
         self.delete_button.setShortcut('Del')
         self.delete_button.setToolTip('Delete selected actions (Del)')
         self.delete_button.setSizePolicy(button_size_policy)
         self.buttons_layout.addWidget(self.delete_button)
         # Spacer
-        self.vertical_spacer = QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.vertical_spacer = QSpacerItem(100, 1, QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.buttons_layout.addItem(self.vertical_spacer)
         # Settings button
-        self.settings_button = QPushButton(QIcon.fromTheme('configure'), '')
+        self.settings_button = QPushButton()
+        self.settings_button.setIcon(QIcon(get_icon_path('icons/configure.svg')))
         self.settings_button.setToolTip('Settings')
         self.settings_button.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
         self.buttons_layout.addWidget(self.settings_button)
 
         # Actions table
         self.actions_table = ActionsTable()
-        self.layout.addWidget(self.actions_table)
-        self.layout.setStretch(0, 0)
-        self.layout.setStretch(1, 1)
+        self.right_layout.addWidget(self.actions_table)
         self.actions_table.horizontalHeader().resizeSection(0, 150)
         self.actions_table.horizontalHeader().setStretchLastSection(True)
         font = self.actions_table.horizontalHeader().font()
@@ -617,6 +592,12 @@ class MainWindow(QMainWindow):
 
         model = ActionsModel([])
         self.actions_table.setModel(model)
+
+        # Layouts stretch
+        self.right_layout.setStretch(0, 0)
+        self.right_layout.setStretch(1, 8)
+        self.layout.setStretch(0, 0)
+        self.layout.setStretch(1, 1)
 
         # Menu bar
         self.menubar = QMenuBar(self)
@@ -636,17 +617,3 @@ class MainWindow(QMainWindow):
         self.menu_file.addAction(self.action_new)
         self.menu_file.addAction(self.action_open)
         self.menu_file.addAction(self.action_save)
-
-        self.menu_windows = QMenu('Windows', self.menubar)
-        self.menubar.addAction(self.menu_windows.menuAction())
-        self.action_new_action_dock = QAction('New action', self)
-        self.action_new_action_dock.setCheckable(True)
-        self.action_new_action_dock.setChecked(True)
-        self.menu_windows.addAction(self.action_new_action_dock)
-
-        # Setup icons for Windows and MacOS
-        if SYSTEM != 'Linux':
-            self.run_button.setIcon(QIcon(get_icon_path('icons/system-run.svg')))
-            self.move_up_button.setIcon(QIcon(get_icon_path('icons/go-up.svg')))
-            self.move_down_button.setIcon(QIcon(get_icon_path('icons/go-down.svg')))
-            self.delete_button.setIcon(QIcon(get_icon_path('icons/edit-delete.svg')))

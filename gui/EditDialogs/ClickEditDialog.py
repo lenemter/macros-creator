@@ -54,13 +54,15 @@ class ClickEditDialog(EditDialog):
 
     def init_ui(self):
         super().init_ui()
-        self.resize(400, 515)
-        self.setMinimumSize(400, 515)
+        self.resize(400, 545)
+        self.setMinimumSize(400, 545)
 
         # Action
         self.action_label = QLabel('Action:')  # Label
         self.action_label.setAlignment(Qt.AlignRight)
         self.action_comboBox = QComboBox()  # ComboBox
+        self.action_comboBox.view().window().setWindowFlags(
+            Qt.Popup | Qt.FramelessWindowHint | Qt.NoDropShadowWindowHint)
         self.action_comboBox.addItems(['Click', 'Press', 'Release'])
 
         self.properties_grid.addWidget(self.action_label, 0, 0)

@@ -28,6 +28,4 @@ def get_icon_path(path: str) -> str:
 
 
 def get_action_icon(action_class) -> str:
-    if system == 'Linux':
-        return Path(ACTION_ICONS.get(action_class, 'icons/data-error.svg')).stem
     return ACTION_ICONS.get(action_class, 'icons/data-error.svg')
