@@ -16,9 +16,9 @@ class StopWindow(QDialog):
         self.runner_thread.started.connect(self.runner.run)
         self.runner.finished.connect(self.close_thread)
 
-    def exec_(self):
+    def exec(self):
         self.runner_thread.start()
-        return super().exec_()
+        return super().exec()
 
     def close_thread(self):
         self.runner.stop()

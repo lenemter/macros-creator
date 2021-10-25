@@ -36,26 +36,39 @@ def read_file_xml(filepath: str) -> tuple:
 
 # Write file ---
 
-def write_file(path: str, actions: list, settings: dict = None):
+def write_file(path, actions: list, settings: dict):
     return write_file_xml(path, actions, settings)
 
 
-def write_file_xml(path: str, actions: list, settings: dict):
-    if settings is None:
-        settings = {}
+def write_file_xml(path, actions: list, settings: dict):
     settings = {str(x): str(y) for (x, y) in settings.items()}
     root = ET.Element('macro', settings)
     for action in actions:
-        root.append(action.xml())
+        a = action.xml()
+        root.append(a)
     tree = ET.ElementTree(root)
     tree.write(path)
 
+
+def write_file_db(path, actions: list, settings: dict):
+    import sqlite3
+
+    connection = sqlite3.connect(path)
+    cursor = connection.cursor()
+    cursor.execute('CREATE TABLE settings ('
+                   'name TEXT PRIMARY KEY,'
+                   'value TEXT);')
+    cursor.execute('CREATE TABLE macro ('
+                   'name TEXT PRIMARY KEY,'
+                   'parameters TEXT);')
+    for action in actions:
+        cursor.execute()
 
 # Run ---
 
 def run(actions_list: list, settings):
     window = StopWindow(Runner, actions_list, settings)
-    window.exec_()
+    window.exec()
 
 
 class Runner(QObject):
@@ -63,35 +76,27 @@ class Runner(QObject):
 
     def __init__(self, actions_list, settings: dict):
         super().__init__()
-        self._actions_list = actions_list
-        self.settings = settings.copy()
-        self._current_action = None
-        self._stop_flag = False
+        self.__actions_list = actions_list.copy()
+        self.__settings = settings.copy()
+        self.__current_action = None
+        self.__stop_flag = False
 
     def stop(self):
-        self._stop_flag = True
-        self._current_action.stop()
+        self.__stop_flag = True
+        self.__current_action.stop()
 
     def run(self):
-        self._current_action = actions.PauseAction.PauseAction(duration=1)
-        self._current_action.run()
-
-        time_between = actions.PauseAction.PauseAction(duration=self.settings.get('time_between', 0.0))
+        time_between = actions.PauseAction.PauseAction(duration=self.__settings.get('time_between', 0.0))
+        self.__current_action = actions.PauseAction.PauseAction(duration=1)
+        self.__current_action.run()
 
         i = 0  # current action index
-        while i < len(self._actions_list) and not self._stop_flag:
-            self._current_action = self._actions_list[i]
-            try:
-                next_line = self._current_action.run()
-            except pyautogui.FailSafeException:
-                # mixins.PyautoguiStopMixin handles this
-                break
-            self._current_action._stop_flag = False
-            if next_line is None:
-                next_line = i + 1
-            else:
-                next_line -= 1  # Convert line to index
+        while i < len(self.__actions_list) and not self.__stop_flag:
+            self.__current_action = self.__actions_list[i]  # get action
+            self.__current_action.__stop_flag = False  # reset stop flag
+            next_line = self.__current_action.run()  # run
+            next_line = i + 1 if next_line is None else next_line - 1  # get next index
             i = next_line
             time_between.run()
-        self._stop_flag = False
+        self.__stop_flag = False
         self.finished.emit()

@@ -13,9 +13,12 @@ class Path(UserList):
         if path_str is None:
             return
         tuples = path_str.split(' ')
-        for t in tuples:
-            x, y = [int(x) for x in t.split(',')]
-            self.data.append((x, y))
+        try:
+            for t in tuples:
+                x, y = [int(x) for x in t.split(',')]
+                self.data.append((x, y))
+        except ValueError:
+            self.data = []
 
 
 def convert(path: Path):
