@@ -1,6 +1,10 @@
 from PyQt5.QtWidgets import QApplication
-from gui.MainWindow import MainWindow
 import sys
+import qtmodern.styles
+import qtmodern.windows
+from gui import stylesheet
+
+from gui.MainWindow import MainWindow
 
 
 def except_hook(cls, exception, traceback):
@@ -18,8 +22,8 @@ if __name__ == '__main__':
 
     # Stylesheet
     app.setStyle('Fusion')
-    # with open('gui/py_dracula_dark.qss', mode='r', encoding='UTF-8') as file:
-    #     app.setStyleSheet(file.read())
+    app.setPalette(stylesheet.get_dark_palette())
+    app.setFont(stylesheet.get_font())
 
     main_window = MainWindow()
     main_window.show()

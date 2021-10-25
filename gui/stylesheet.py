@@ -1,95 +1,38 @@
-common_stylesheet = """
-QLabel {
-    padding: 8px;
-}
-QPushButton, QLineEdit, QTextEdit, QMenu {
-    border-radius: 2px
-}
-QComboBox QAbstractItemView {
-    background-color: #eee;
-    border: 1px solid #bbb;
-    padding: 4px;
-}
-QPushButton {
-    padding: 6px 12px;
-}
-QLineEdit {
-    padding: 6px;
-}
-QComboBox, QSpinBox, QDoubleSpinBox {
-    padding: 6px;
-}
-QTextEdit {
-    padding: 1px;
-    margin: 2px;
-    background-color: palette(base);  /* fix for border-radius */
-}
-QHeaderView::section {
-    font-weight: bold;
-}
-"""
+def get_dark_palette():
+    from PyQt5.QtGui import QPalette, QColor
+    from PyQt5.QtCore import Qt
 
-light_stylesheet = common_stylesheet + """
-* {
-    color: #333333;
-}
-QMainWindow, QDialog, #container {
-    background-color: #eeeeee;
-}
-QPushButton {
-    background-color: #ffffff;
-    border: 1px solid #bbbbbb;
-}
-QLineEdit {
-    border: 1px solid #bbbbbb;
-}
-QTextEdit {
-    border: 1px solid #bbbbbb;
-}
-QTableView {
-    border-color: #999999;
-}
-QTableView::item {
-    selection-background-color: #6fb2dc;
-}
-QHeaderView::section {
-    background-color: #ffffff;
-}
-QMenu {
-    border: 1px solid #000000;
-    background-color: #ffffff;
-}
-QComboBox, QSpinBox, QDoubleSpinBox {
-    background-color: #ffffff;
-}
-"""
+    palette = QPalette()
+    palette.setColor(QPalette.Window, QColor(53, 53, 53))
+    palette.setColor(QPalette.WindowText, Qt.white)
+    palette.setColor(QPalette.Disabled, QPalette.WindowText,
+                     QColor(127, 127, 127))
+    palette.setColor(QPalette.Base, QColor(42, 42, 42))
+    palette.setColor(QPalette.AlternateBase, QColor(66, 66, 66))
+    palette.setColor(QPalette.ToolTipBase, Qt.white)
+    palette.setColor(QPalette.ToolTipText, QColor(53, 53, 53))
+    palette.setColor(QPalette.Text, Qt.white)
+    palette.setColor(QPalette.Disabled, QPalette.Text, QColor(127, 127, 127))
+    palette.setColor(QPalette.Dark, QColor(35, 35, 35))
+    palette.setColor(QPalette.Shadow, QColor(20, 20, 20))
+    palette.setColor(QPalette.Button, QColor(53, 53, 53))
+    palette.setColor(QPalette.ButtonText, Qt.white)
+    palette.setColor(QPalette.Disabled, QPalette.ButtonText,
+                     QColor(127, 127, 127))
+    palette.setColor(QPalette.BrightText, Qt.red)
+    palette.setColor(QPalette.Link, QColor(42, 130, 218))
+    palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
+    palette.setColor(QPalette.Disabled, QPalette.Highlight, QColor(80, 80, 80))
+    palette.setColor(QPalette.HighlightedText, Qt.white)
+    palette.setColor(QPalette.Disabled, QPalette.HighlightedText,
+                     QColor(127, 127, 127))
 
-dark_stylesheet = common_stylesheet + """
-* {
-    color: #ddd;
-}
-QMainWindow, QDialog, #container {
-    background-color: #2a2a2a;
-}
-QPushButton {
-    background-color: #4a4a4a;
-    border: 1px solid #444;
-}
-QLineEdit {
-    background-color: #4a4a4a;
-    border: 1px solid #444;
-}
-QTextEdit {
-    background-color: #4a4a4a;
-    border: 1px solid #444;
-}
-QTableView {
-    background-color: #444;
-}
-QTableView::item {
-    selection-background-color: #5174a3;
-}
-QHeaderView::section {
-    background-color: #444;
-}
-"""
+    return palette
+
+
+def get_font():
+    from PyQt5.QtWidgets import QApplication
+
+    default_font = QApplication.font()
+    default_font.setPointSize(default_font.pointSize() + 1)
+    return default_font

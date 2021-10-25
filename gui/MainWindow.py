@@ -372,7 +372,9 @@ def create_action_tree_items() -> list:
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self._opened_file = None
         self.opened_file = DEFAULT_OPENED_FILE
+        self.opened_file_filter = None
         self.init_ui()
 
         self.last_saved_actions = []
@@ -391,6 +393,17 @@ class MainWindow(QMainWindow):
         self.action_new.triggered.connect(self.new_file)
         self.action_open.triggered.connect(self.open_file)
         self.action_save.triggered.connect(self.save_file)
+
+    @property
+    def opened_file(self):
+        return self._opened_file
+
+    @opened_file.setter
+    def opened_file(self, value):
+        if not isinstance(value, str):
+            raise ValueError('Non string opened_file')
+        self._opened_file = value
+        self.setWindowTitle(f'{self._opened_file}')
 
     def run(self):
         runner.run(self.actions_table.model().actions.copy(), self.settings)
@@ -416,8 +429,6 @@ class MainWindow(QMainWindow):
 
     def delete(self):
         selected_rows = self.actions_table.get_selected_rows()
-        print(self.last_saved_actions)
-        print(self.actions_table.model().actions)
         if selected_rows:
             for i, row in enumerate(selected_rows):
                 self.actions_table.model().removeRow(row - i)
@@ -452,13 +463,18 @@ class MainWindow(QMainWindow):
             self.setWindowModified(False)
 
     def new_file(self):
-        file_dialog = QFileDialog(self, 'Create new file', HOME, '.mcrc DB (*.mcrc);; .mcrc CSV (*.mcrc)')
+        file_dialog = QFileDialog(self,
+                                  'Create new file',
+                                  HOME,
+                                  '.mcrc XML (*.mcrc);; .mcrc DB (*.mcrc);; .mcrc CSV (*.mcrc)')
         file_dialog.setFilter(file_dialog.filter() | QDir.Hidden)
         file_dialog.setAcceptMode(QFileDialog.AcceptSave)
         file_dialog.setDefaultSuffix('mcrc')
         if file_dialog.exec() == QFileDialog.Accepted:
             if self.isWindowModified():
-                reply = QMessageBox.warning(self, 'Save changes', 'Do you want to save your changes?',
+                reply = QMessageBox.warning(self,
+                                            'Save changes',
+                                            'Do you want to save your changes?',
                                             QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
                 if reply == QMessageBox.Save:
                     return_code = self.save_file()
@@ -469,24 +485,27 @@ class MainWindow(QMainWindow):
                 else:
                     return
 
-            filename = file_dialog.selectedFiles()[0]
-            print(f'{filename=}')
-            with open(filename, mode='w', encoding='UTF-8') as _:
+            self.opened_file = file_dialog.selectedFiles()[0]
+            self.opened_file_filter = file_dialog.selectedMimeTypeFilter()
+            with open(self.opened_file, mode='w', encoding='UTF-8') as _:
                 pass
-            self.opened_file = filename
-            self.setWindowTitle(f'{self.opened_file}[*]')
             self.actions_table.setModel(ActionsModel([]))
             self.last_saved_actions = []
             self.handle_save()
 
     def open_file(self):
-        file_dialog = QFileDialog(self, 'Open file', HOME, '.mcrc DB (*.mcrc);; .mcrc CSV (*.mcrc)')
+        file_dialog = QFileDialog(self,
+                                  'Open file',
+                                  HOME,
+                                  '.mcrc XML (*.mcrc);; .mcrc DB (*.mcrc);; .mcrc CSV (*.mcrc)')
         file_dialog.setFilter(file_dialog.filter())
         file_dialog.setAcceptMode(QFileDialog.AcceptOpen)
         file_dialog.setDefaultSuffix('mcrc')
         if file_dialog.exec() == QFileDialog.Accepted:
             if self.isWindowModified():
-                reply = QMessageBox.warning(self, 'Save changes', 'Do you want to save your changes?',
+                reply = QMessageBox.warning(self,
+                                            'Save changes',
+                                            'Do you want to save your changes?',
                                             QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
                 if reply == QMessageBox.Save:
                     return_code = self.save_file()
@@ -497,36 +516,53 @@ class MainWindow(QMainWindow):
                 else:
                     return
 
-            filename = file_dialog.selectedFiles()[0]
-            self.opened_file = filename
-            self.setWindowTitle(f'{self.opened_file}[*]')
-            actions, self.settings = runner.read_file(filename)
+            self.opened_file = file_dialog.selectedFiles()[0]
+            self.opened_file_filter = file_dialog.selectedNameFilter()
+
+            if self.opened_file_filter == '.mcrc XML (*.mcrc)':
+                actions, settings = runner.read_file_xml(self.opened_file)
+            elif self.opened_file_filter == '.mcrc DB (*.mcrc)':
+                actions, settings = runner.read_file_db(self.opened_file,)
+            elif self.opened_file_filter == '.mcrc CSV (*.mcrc)':
+                actions, settings = runner.read_file_csv(self.opened_file)
+            else:
+                raise ValueError('Unknown file format')
+
             self.actions_table.setModel(ActionsModel(actions))
             self.last_saved_actions = actions.copy()
             self.handle_save()
 
     def save_file(self) -> Optional[int]:
         if self.opened_file == DEFAULT_OPENED_FILE:
-            file_dialog = QFileDialog(self, 'Create new file', HOME, '.mcrc DB (*.mcrc);; .mcrc CSV (*.mcrc)')
+            file_dialog = QFileDialog(self,
+                                      'Create new file',
+                                      HOME,
+                                      '.mcrc XML (*.mcrc);; .mcrc DB (*.mcrc);; .mcrc CSV (*.mcrc)')
             file_dialog.setFilter(file_dialog.filter() | QDir.Hidden)
             file_dialog.setAcceptMode(QFileDialog.AcceptSave)
             file_dialog.setDefaultSuffix('mcrc')
             if file_dialog.exec() == QFileDialog.Accepted:
                 if self.isWindowModified():
-                    filepath = file_dialog.selectedFiles()[0]
-                    with open(filepath, mode='w', encoding='UTF-8') as _:
+                    self.opened_file = file_dialog.selectedFiles()[0]
+                    self.opened_file_filter = file_dialog.selectedNameFilter()
+                    with open(self.opened_file, mode='w', encoding='UTF-8') as _:
                         pass
-                    self.opened_file = filepath
                 else:
                     return 1
 
-        runner.write_file(self.opened_file, self.actions_table.model().actions.copy(), self.settings)
-        self.setWindowTitle(f'{self.opened_file}[*]')
+        if self.opened_file_filter == '.mcrc XML (*.mcrc)':
+            runner.write_file_xml(self.opened_file, self.actions_table.model().actions.copy(), self.settings)
+        elif self.opened_file_filter == '.mcrc DB (*.mcrc)':
+            runner.write_file_db(self.opened_file, self.actions_table.model().actions.copy(), self.settings)
+        elif self.opened_file_filter == '.mcrc CSV (*.mcrc)':
+            runner.write_file_csv(self.opened_file, self.actions_table.model().actions.copy(), self.settings)
+        else:
+            raise ValueError('Unknown file format')
+
         self.last_saved_actions = self.actions_table.model().actions.copy()
         self.handle_save()
 
     def init_ui(self):
-        self.setWindowTitle(self.opened_file)
         self.setWindowModified(False)
         self.resize(900, 550)
         self.setMinimumSize(600, 300)
@@ -535,7 +571,6 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.centralWidget)
 
         self.layout = QHBoxLayout()
-        self.layout.setObjectName('main_layout')
         self.layout.setContentsMargins(4, 4, 4, 4)
         self.layout.setSpacing(4)
         self.centralWidget.setLayout(self.layout)
@@ -622,18 +657,18 @@ class MainWindow(QMainWindow):
         self.layout.setStretch(1, 1)
 
         # Menu bar
-        self.menubar = QMenuBar(self)
+        self.menubar = QMenuBar()
         self.menubar.setGeometry(QRect(0, 0, 800, 30))
         self.setMenuBar(self.menubar)
 
-        self.menu_file = QMenu('File', self.menubar)
+        self.menu_file = QMenu('File')
         self.menubar.addAction(self.menu_file.menuAction())
 
-        self.action_new = QAction('New', self)
+        self.action_new = QAction('New')
         self.action_new.setShortcut('Ctrl+N')
-        self.action_open = QAction('Open', self)
+        self.action_open = QAction('Open')
         self.action_open.setShortcut('Ctrl+O')
-        self.action_save = QAction('Save', self)
+        self.action_save = QAction('Save')
         self.action_save.setShortcut('Ctrl+S')
 
         self.menu_file.addAction(self.action_new)

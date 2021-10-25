@@ -12,10 +12,6 @@ for cls in actions.Action.Action.__subclasses__():
     name_class_dict[cls.name] = cls
 
 
-def read_file(filepath: str):
-    return read_file_xml(filepath)
-
-
 def read_file_xml(filepath: str) -> tuple:
     actions = []
     tree = ET.parse(filepath)
@@ -35,10 +31,6 @@ def read_file_xml(filepath: str) -> tuple:
 
 
 # Write file ---
-
-def write_file(path, actions: list, settings: dict):
-    return write_file_xml(path, actions, settings)
-
 
 def write_file_xml(path, actions: list, settings: dict):
     settings = {str(x): str(y) for (x, y) in settings.items()}
@@ -63,6 +55,7 @@ def write_file_db(path, actions: list, settings: dict):
                    'parameters TEXT);')
     for action in actions:
         cursor.execute()
+
 
 # Run ---
 
