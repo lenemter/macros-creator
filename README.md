@@ -3,7 +3,9 @@
 Simple application for creating macros
 
 Build app with PyInstaller:  
-`pyinstaller --onefile -w --add-data "gui/icons/.:." main.py # Linux / MacOS`  
-`pyinstaller --onefile -w --add-data "gui/icons/.;." main.py # Windows`
+### Linux / MacOS
+`pyinstaller --onefile -w --add-data "gui/icons/.:." main.py`
+### Windows
+`pyinstaller --onefile -w --add-data "gui/icons/.;." main.py`
 
 Icons: [Breeze icon theme](https://github.com/KDE/breeze-icons)
