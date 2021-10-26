@@ -11,15 +11,23 @@ class PressKeyAction(mixins.PyautoguiStopMixin, Action):
     category = 'Keyboard'
 
     def __init__(self, comment='', key='', action='Press and release', amount=1, interval=0):
-        self.comment = comment
-        self.key = key
-        self.action = action
+        self.comment = str(comment)
+        self.key = str(key)
+        self.action = str(action)
         self.amount = int(amount)
         self.interval = float(interval)
 
+    @property
+    def parameters(self) -> dict:
+        return {'comment': self.comment,
+                'key': self.key,
+                'action': self.action,
+                'amount': self.amount,
+                'interval': self.interval}
+
     def open_edit_dialog(self, parent) -> bool:
         edit_dialog = PressKeyEditDialog.PressKeyEditDialog(parent, self)
-        edit_dialog.exec_()
+        edit_dialog.exec()
 
         if edit_dialog.user_clicked_ok:
             properties = edit_dialog.properties()
@@ -27,13 +35,6 @@ class PressKeyAction(mixins.PyautoguiStopMixin, Action):
             if was_changed:
                 self.comment, self.key, self.action, self.amount, self.interval = properties
             return was_changed
-
-    def xml(self) -> ET.Element:
-        return ET.Element(self.get_xml_name(), {'comment': self.comment,
-                                                'key': self.key,
-                                                'action': self.action,
-                                                'amount': str(self.amount),
-                                                'interval': str(self.interval)})
 
     def run(self):
         # Import is here because at the top of the file it triggers PauseAction import
@@ -48,5 +49,7 @@ class PressKeyAction(mixins.PyautoguiStopMixin, Action):
                 pause_action.run()
         elif self.action == 'Press':
             pyautogui.keyDown(self.key)
-        else:
+        elif self.action == 'Release':
             pyautogui.keyUp(self.key)
+        else:
+            raise ValueError(f'Unknown action: {self.action}')

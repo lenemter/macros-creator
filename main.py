@@ -1,7 +1,5 @@
 from PyQt5.QtWidgets import QApplication
 import sys
-import qtmodern.styles
-import qtmodern.windows
 from gui import stylesheet
 
 from gui.MainWindow import MainWindow

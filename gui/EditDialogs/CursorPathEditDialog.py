@@ -85,7 +85,7 @@ class CursorPathEditDialog(EditDialog):
         self.set_table_state()
         self.duration_doubleSpinBox.setValue(self.action.duration)
         self.button_comboBox.setCurrentText(self.action.button)
-        self.table.fill_table(self.action.path)
+        self.table.fill_table(self.action.mouse_path)
 
         self.add_point_button.clicked.connect(self.table.add_point)
         self.remove_point_button.clicked.connect(self.table.remove_point)
