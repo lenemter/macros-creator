@@ -20,8 +20,8 @@ class WriteTextAction(Action):
     def parameters(self) -> dict:
         return {'comment': self.comment,
                 'text': self.text,
-                'amount': str(self.amount),
-                'interval': str(self.interval)}
+                'amount': self.amount,
+                'interval': self.interval}
 
     def open_edit_dialog(self, parent) -> bool:
         edit_dialog = WriteTextEditDialog.WriteTextEditDialog(parent, self)
