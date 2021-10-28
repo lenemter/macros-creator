@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QSizePolicy, QPushButton
 from PyQt5.QtCore import QThread, Qt
 
 
-class StopWindow(QDialog):
+class StopDialog(QDialog):
     def __init__(self, runner_class, actions_list: list, settings):
         super().__init__()
         self.init_ui()

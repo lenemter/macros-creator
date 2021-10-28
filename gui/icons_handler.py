@@ -1,17 +1,14 @@
 import sys
 from pathlib import Path
 import actions
-import platform
 
-system = platform.system()
-
-ACTION_ICONS = {actions.ClickAction.ClickAction: 'icons/input-mouse.svg',
-                actions.MoveCursorAction.MoveCursorAction: 'icons/transform-move.svg',
-                actions.CursorPathAction.CursorPathAction: 'icons/path-mode-polyline.svg',
-                actions.PressKeyAction.PressKeyAction: 'icons/input-keyboard.svg',
-                actions.WriteTextAction.WriteTextAction: 'icons/edit-select-text.svg',
-                actions.PauseAction.PauseAction: 'icons/media-playback-pause.svg',
-                actions.LoopAction.LoopAction: 'icons/gtk-convert.svg'}
+ACTION_ICONS = {actions.ClickAction: 'icons/input-mouse.svg',
+                actions.MoveCursorAction: 'icons/transform-move.svg',
+                actions.CursorPathAction: 'icons/path-mode-polyline.svg',
+                actions.PressKeyAction: 'icons/input-keyboard.svg',
+                actions.WriteTextAction: 'icons/edit-select-text.svg',
+                actions.PauseAction: 'icons/media-playback-pause.svg',
+                actions.LoopAction: 'icons/gtk-convert.svg'}
 
 
 def get_icon_path(path: str) -> str:
@@ -21,7 +18,7 @@ def get_icon_path(path: str) -> str:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = Path(sys._MEIPASS)
         path = path.name
-    except Exception:
+    except AttributeError:
         base_path = Path(__file__).parent.resolve()
 
     return str(base_path / path)

@@ -9,7 +9,7 @@ class MoveCursorAction(mixins.PyautoguiStopMixin, Action):
     name = 'Move cursor'
     category = 'Mouse'
 
-    def __init__(self, comment='', move_type='Absolute', position_x=-1, position_y=-1, duration=0, button='None'):
+    def __init__(self, comment='', move_type='Absolute', position_x=-1, position_y=-1, duration=0.0, button='None'):
         self.comment = str(comment)
         self.move_type = str(move_type)
         self.position_x = int(position_x)

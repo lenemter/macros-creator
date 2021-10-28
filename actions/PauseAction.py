@@ -8,7 +8,7 @@ class PauseAction(Action):
     name = 'Pause'
     category = 'Other'
 
-    def __init__(self, comment='', duration=1):
+    def __init__(self, comment='', duration=1.0):
         self.comment = str(comment)
         self.duration = float(duration)
 

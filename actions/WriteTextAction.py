@@ -8,7 +8,7 @@ class WriteTextAction(Action):
     name = 'Write text'
     category = 'Keyboard'
 
-    def __init__(self, comment='', text='', amount=1, interval=0):
+    def __init__(self, comment='', text='', amount=1, interval=0.0):
         self.comment = str(comment)
         self.text = str(text)
         self.amount = int(amount)

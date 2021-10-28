@@ -10,7 +10,7 @@ class PressKeyAction(mixins.PyautoguiStopMixin, Action):
     name = 'Press key'
     category = 'Keyboard'
 
-    def __init__(self, comment='', key='', action='Press and release', amount=1, interval=0):
+    def __init__(self, comment='', key='', action='Press and release', amount=1, interval=0.0):
         self.comment = str(comment)
         self.key = str(key)
         self.action = str(action)

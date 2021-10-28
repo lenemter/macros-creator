@@ -11,7 +11,11 @@ from .SettingsDialog import SettingsDialog
 from .icons_handler import get_icon_path, get_action_icon
 
 HOME = str(Path.home())
-DEFAULT_OPENED_FILE = 'untitled.mcrc[*]'
+DEFAULT_OPENED_FILE = 'untitled.mcrc'
+DEFAULT_SETTINGS = {
+    'time_between': 0.0
+}
+FILE_FILTERS = '.mcrc XML (*.mcrc);; .mcrc CSV (*.mcrc)'
 
 
 class NewActionTreeNode:
@@ -372,13 +376,14 @@ def create_action_tree_items() -> list:
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
         self._opened_file = None
         self.opened_file = DEFAULT_OPENED_FILE
         self.opened_file_filter = None
-        self.init_ui()
-
         self.last_saved_actions = []
-        self.settings = {}
+        self.settings = DEFAULT_SETTINGS
+
+        self.init_ui()
 
         self.actions_table.addActionSignal.connect(self.add_new_action)
         self.actions_table.dataChangedSignal.connect(self.handle_save)
@@ -401,9 +406,9 @@ class MainWindow(QMainWindow):
     @opened_file.setter
     def opened_file(self, value):
         if not isinstance(value, str):
-            raise ValueError('Non string opened_file')
+            raise ValueError('opened_file is not a string')
         self._opened_file = value
-        self.setWindowTitle(f'{self._opened_file}')
+        self.setWindowTitle(f'{self._opened_file}[*]')
 
     def run(self):
         runner.run(self.actions_table.model().actions.copy(), self.settings)
@@ -466,7 +471,7 @@ class MainWindow(QMainWindow):
         file_dialog = QFileDialog(self,
                                   'Create new file',
                                   HOME,
-                                  '.mcrc XML (*.mcrc);; .mcrc DB (*.mcrc);; .mcrc CSV (*.mcrc)')
+                                  FILE_FILTERS)
         file_dialog.setFilter(file_dialog.filter() | QDir.Hidden)
         file_dialog.setAcceptMode(QFileDialog.AcceptSave)
         file_dialog.setDefaultSuffix('mcrc')
@@ -497,7 +502,7 @@ class MainWindow(QMainWindow):
         file_dialog = QFileDialog(self,
                                   'Open file',
                                   HOME,
-                                  '.mcrc XML (*.mcrc);; .mcrc DB (*.mcrc);; .mcrc CSV (*.mcrc)')
+                                  FILE_FILTERS)
         file_dialog.setFilter(file_dialog.filter())
         file_dialog.setAcceptMode(QFileDialog.AcceptOpen)
         file_dialog.setDefaultSuffix('mcrc')
@@ -521,8 +526,6 @@ class MainWindow(QMainWindow):
 
             if self.opened_file_filter == '.mcrc XML (*.mcrc)':
                 actions, settings = runner.read_file_xml(self.opened_file)
-            elif self.opened_file_filter == '.mcrc DB (*.mcrc)':
-                actions, settings = runner.read_file_db(self.opened_file,)
             elif self.opened_file_filter == '.mcrc CSV (*.mcrc)':
                 actions, settings = runner.read_file_csv(self.opened_file)
             else:
@@ -537,7 +540,7 @@ class MainWindow(QMainWindow):
             file_dialog = QFileDialog(self,
                                       'Create new file',
                                       HOME,
-                                      '.mcrc XML (*.mcrc);; .mcrc DB (*.mcrc);; .mcrc CSV (*.mcrc)')
+                                      FILE_FILTERS)
             file_dialog.setFilter(file_dialog.filter() | QDir.Hidden)
             file_dialog.setAcceptMode(QFileDialog.AcceptSave)
             file_dialog.setDefaultSuffix('mcrc')
@@ -547,9 +550,8 @@ class MainWindow(QMainWindow):
                     self.opened_file_filter = file_dialog.selectedNameFilter()
                     with open(self.opened_file, mode='w', encoding='UTF-8') as _:
                         pass
-                else:
-                    return 1
-
+            else:
+                return 1
         if self.opened_file_filter == '.mcrc XML (*.mcrc)':
             runner.write_file_xml(self.opened_file, self.actions_table.model().actions.copy(), self.settings)
         elif self.opened_file_filter == '.mcrc DB (*.mcrc)':

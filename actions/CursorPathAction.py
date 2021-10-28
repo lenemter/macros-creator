@@ -29,18 +29,15 @@ class CursorPathAction(mixins.PyautoguiStopMixin, Action):
     name = 'Cursor path'
     category = 'Mouse'
 
-    def __init__(self, comment='', move_type='Absolute', duration=0, button='None', mouse_path=None):
+    def __init__(self, comment='', move_type='Absolute', duration=0.0, button='None', mouse_path=''):
         self.comment = str(comment)
         self.move_type = str(move_type)
         self.duration = float(duration)
         self.button = str(button)
-        if mouse_path is None:
-            mouse_path = load_mouse_path('')
-        elif isinstance(mouse_path, str):
-            mouse_path = load_mouse_path(mouse_path)
+        if isinstance(mouse_path, str):
+            self.mouse_path = list(load_mouse_path(mouse_path))
         else:
             raise ValueError(f'Could not parse mouse_path: {mouse_path}')
-        self.mouse_path = list(mouse_path)
 
     @property
     def parameters(self):
