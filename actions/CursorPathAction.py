@@ -1,7 +1,6 @@
-from xml.etree import ElementTree as ET
 import pyautogui
 
-from actions.Action import Action
+from .Action import Action
 from . import mixins
 from gui.EditDialogs import CursorPathEditDialog
 
@@ -45,7 +44,7 @@ class CursorPathAction(mixins.PyautoguiStopMixin, Action):
                 'move_type': self.move_type,
                 'duration': self.duration,
                 'button': self.button,
-                'path': export_mouse_path(self.mouse_path)}
+                'mouse_path': export_mouse_path(self.mouse_path)}
 
     def open_edit_dialog(self, parent) -> bool:
         edit_dialog = CursorPathEditDialog.CursorPathEditDialog(parent, self)

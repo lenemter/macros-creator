@@ -13,5 +13,6 @@ def write_file_xml(filepath, actions: list, settings: dict):
     with open(filepath, mode='wb') as file:
         tree.write(file, encoding='UTF-8')
 
+
 def write_file_csv(filepath, actions: list, settings: dict):
     pass

@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import Optional, Any, Union
 
 from actions.Action import Action, NoneAction
+from gui.icons_handler import get_icon_path, get_action_icon
+from gui.SettingsDialog import SettingsDialog
 import runner
-from .SettingsDialog import SettingsDialog
-from .icons_handler import get_icon_path, get_action_icon
 
 HOME = str(Path.home())
 DEFAULT_OPENED_FILE = 'untitled.mcrc'
@@ -211,8 +211,11 @@ class ActionsModel(QAbstractTableModel):
         self.endRemoveRows()
         return True
 
-    def move_up(self, rows) -> bool:
-        was_changed = False
+    def move_up(self, rows):
+        # if rows in the start and go in a row
+        if rows[-1] - rows[0] + 1 == len(rows) and rows[0] == 0:
+            return None
+
         for row in rows:
             min_row = max((row - 1, 0))
             if row != min_row:
@@ -220,21 +223,20 @@ class ActionsModel(QAbstractTableModel):
                 index = create_table_index(self, row, 0)
                 index_1 = create_table_index(self, min_row, 0)
                 self.dataChanged.emit(index, index_1)
-                was_changed = True
-        return was_changed
 
-    def move_down(self, rows) -> bool:
-        was_changed = False
+    def move_down(self, rows):
+        # if rows in the end and go in a row
+        if rows[-1] - rows[0] + 1 == len(rows) and rows[-1] == self.rowCount() - 1:
+            return None
+
         rows.reverse()
         for row in rows:
-            max_row = min((row + 1, self.rowCount() - 1))
-            if row != max_row:
-                self._data[max_row], self._data[row] = self._data[row], self._data[max_row]
+            next_row = min((row + 1, self.rowCount() - 1))
+            if row != next_row:
+                self._data[next_row], self._data[row] = self._data[row], self._data[next_row]
                 index = create_table_index(self, row, 0)
-                index_1 = create_table_index(self, max_row, 0)
+                index_1 = create_table_index(self, next_row, 0)
                 self.dataChanged.emit(index, index_1)
-                was_changed = True
-        return was_changed
 
     @property
     def actions(self) -> list:
@@ -258,6 +260,10 @@ class ActionsTable(QTableView):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setDragDropMode(QAbstractItemView.InternalMove)
 
+    @property
+    def selected_rows(self) -> list:
+        return sorted(set(index.row() for index in self.selectedIndexes()))
+
     def setModel(self, model):
         super().setModel(model)
         self.model().dataChanged.connect(self.dataChangedSignal.emit)
@@ -277,7 +283,7 @@ class ActionsTable(QTableView):
     def dropEvent(self, event: QDropEvent):
         if event.source() == self:
             model = self.model()
-            rows = self.get_selected_rows()
+            rows = self.selected_rows
             target_row = self.indexAt(event.pos()).row()
 
             if rows[0] == target_row:
@@ -324,11 +330,14 @@ class ActionsTable(QTableView):
         main_window = self.parent().parent()
         action.open_edit_dialog(main_window)
 
-    def get_selected_rows(self) -> list:
-        return sorted(set(index.row() for index in self.selectedIndexes()))
+    def move_up(self):
+        self.model().move_up(self.selected_rows)
+
+    def move_down(self):
+        self.model().move_down(self.selected_rows)
 
     def move_selection_up(self):
-        selected_rows = self.get_selected_rows()
+        selected_rows = self.selected_rows
         for row in selected_rows:
             min_row = max((row - 1, 0))
             if row == min_row and len(selected_rows) == 1:
@@ -338,7 +347,7 @@ class ActionsTable(QTableView):
                 self.selectRow(min_row)
 
     def move_selection_down(self):
-        selected_rows = self.get_selected_rows()
+        selected_rows = self.selected_rows
         selected_rows.reverse()
         for row in selected_rows:
             max_row = min((row + 1, self.model().rowCount() - 1))
@@ -391,8 +400,8 @@ class MainWindow(QMainWindow):
 
         self.new_action_tree.doubleClicked.connect(self.add_new_action)
         self.delete_button.clicked.connect(self.delete)
-        self.move_up_button.clicked.connect(self.move_up)
-        self.move_down_button.clicked.connect(self.move_down)
+        self.move_up_button.clicked.connect(self.actions_table.move_up)
+        self.move_down_button.clicked.connect(self.actions_table.move_down)
         self.run_button.clicked.connect(self.run)
         self.settings_button.clicked.connect(self.open_settings_dialog)
         self.action_new.triggered.connect(self.new_file)
@@ -414,7 +423,7 @@ class MainWindow(QMainWindow):
         runner.run(self.actions_table.model().actions.copy(), self.settings)
 
     def open_action_edit_dialog(self):
-        selected_rows = self.actions_table.get_selected_rows()
+        selected_rows = self.actions_table.selected_rows
         if len(selected_rows) == 1:
             row = selected_rows[0]
             model = self.actions_table.model()
@@ -438,20 +447,6 @@ class MainWindow(QMainWindow):
             for i, row in enumerate(selected_rows):
                 self.actions_table.model().removeRow(row - i)
             self.handle_save()
-
-    def move_up(self):
-        selected_rows = self.actions_table.get_selected_rows()
-        was_changed = self.actions_table.model().move_up(selected_rows)
-        if was_changed:
-            self.actions_table.move_selection_up()
-            self.force_not_saved()
-
-    def move_down(self):
-        selected_rows = self.actions_table.get_selected_rows()
-        was_changed = self.actions_table.model().move_down(selected_rows)
-        if was_changed:
-            self.actions_table.move_selection_down()
-            self.force_not_saved()
 
     def open_settings_dialog(self):
         dialog = SettingsDialog(self, self.settings)
