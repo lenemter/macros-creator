@@ -37,8 +37,3 @@ class Action(ABC):
     @abstractmethod
     def reset_stop(self):
         raise NotImplementedError
-
-
-class NoneAction:
-    name = ''
-    comment = ''

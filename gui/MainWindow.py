@@ -1,11 +1,12 @@
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTreeView, QPushButton, QMenuBar, QMenu, QAction, \
     QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox, QSpacerItem
-from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, QSize, pyqtSignal, QDir
+from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, QSize, pyqtSignal, QDir, \
+    QItemSelectionModel
 from PyQt5.QtGui import QFont, QIcon, QDropEvent, QDragMoveEvent
 from pathlib import Path
 from typing import Optional, Any, Union
 
-from actions.Action import Action, NoneAction
+from actions.Action import Action
 from gui.icons_handler import get_icon_path, get_action_icon
 from gui.SettingsDialog import SettingsDialog
 import runner
@@ -199,7 +200,7 @@ class ActionsModel(QAbstractTableModel):
         last_inserted_row = row + count - 1
         self.beginInsertRows(QModelIndex(), row, last_inserted_row)
         for i in range(count):
-            self._data.insert(row + i, NoneAction)
+            self._data.insert(row + i, None)
         self.endInsertRows()
         return True
 
@@ -217,11 +218,11 @@ class ActionsModel(QAbstractTableModel):
             return None
 
         for row in rows:
-            min_row = max((row - 1, 0))
-            if row != min_row:
-                self._data[min_row], self._data[row] = self._data[row], self._data[min_row]
+            next_row = max(row - 1, 0)
+            if row != next_row:
+                self._data[next_row], self._data[row] = self._data[row], self._data[next_row]
                 index = create_table_index(self, row, 0)
-                index_1 = create_table_index(self, min_row, 0)
+                index_1 = create_table_index(self, next_row, 0)
                 self.dataChanged.emit(index, index_1)
 
     def move_down(self, rows):
@@ -229,9 +230,8 @@ class ActionsModel(QAbstractTableModel):
         if rows[-1] - rows[0] + 1 == len(rows) and rows[-1] == self.rowCount() - 1:
             return None
 
-        rows.reverse()
-        for row in rows:
-            next_row = min((row + 1, self.rowCount() - 1))
+        for row in reversed(rows):
+            next_row = min(row + 1, self.rowCount() - 1)
             if row != next_row:
                 self._data[next_row], self._data[row] = self._data[row], self._data[next_row]
                 index = create_table_index(self, row, 0)
@@ -246,6 +246,7 @@ class ActionsModel(QAbstractTableModel):
 class ActionsTable(QTableView):
     addActionSignal = pyqtSignal()
     dataChangedSignal = pyqtSignal()
+    actionAddedSignal = pyqtSignal(int)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, *kwargs)
@@ -319,11 +320,11 @@ class ActionsTable(QTableView):
             event.acceptProposedAction()
             self.addActionSignal.emit()
 
-    def create_action(self, action_class, row=-1):
+    def create_action(self, action_cls, row=-1):
         model = self.model()
         if row == -1:
             row = model.rowCount()
-        action = action_class()
+        action = action_cls()
         model.insertRow(row)
         index = create_table_index(model, row, 0)
         model.setData(index, action)
@@ -331,31 +332,42 @@ class ActionsTable(QTableView):
         action.open_edit_dialog(main_window)
 
     def move_up(self):
-        self.model().move_up(self.selected_rows)
+        rows = self.selected_rows
+        self.model().move_up(rows)
+        self.move_selection_up(rows)
 
     def move_down(self):
-        self.model().move_down(self.selected_rows)
+        rows = self.selected_rows
+        self.model().move_down(rows)
+        self.move_selection_down(rows)
 
-    def move_selection_up(self):
-        selected_rows = self.selected_rows
-        for row in selected_rows:
-            min_row = max((row - 1, 0))
-            if row == min_row and len(selected_rows) == 1:
-                return None
-            self.clearSelection()
-            if row != min_row:
-                self.selectRow(min_row)
+    def move_selection_up(self, rows):
+        # if rows in the start and go in a row
+        if rows[-1] - rows[0] + 1 == len(rows) and rows[0] == 0:
+            return None
 
-    def move_selection_down(self):
-        selected_rows = self.selected_rows
-        selected_rows.reverse()
-        for row in selected_rows:
-            max_row = min((row + 1, self.model().rowCount() - 1))
-            if row == max_row and len(selected_rows) == 1:
-                return None
-            self.clearSelection()
-            if row != max_row:
-                self.selectRow(max_row)
+        self.clearSelection()
+        model = self.model()
+        selection_model = self.selectionModel()
+        for row in rows:
+            next_row = max(row - 1, 0)
+            selection_model.select(create_table_index(model, next_row, 0),
+                                   QItemSelectionModel.Select | QItemSelectionModel.Rows)
+
+    def move_selection_down(self, rows):
+        model = self.model()
+        row_count = model.rowCount()
+
+        # if rows in the end and go in a row
+        if rows[-1] - rows[0] + 1 == len(rows) and rows[-1] == row_count - 1:
+            return None
+
+        self.clearSelection()
+        selection_model = self.selectionModel()
+        for row in rows:
+            next_row = min(row + 1, row_count - 1)
+            selection_model.select(create_table_index(model, next_row, 0),
+                                   QItemSelectionModel.Select | QItemSelectionModel.Rows)
 
 
 def create_actions_categories_dict() -> dict:
@@ -436,9 +448,9 @@ class MainWindow(QMainWindow):
     def add_new_action(self):
         model = self.new_action_tree.model()
         index = self.new_action_tree.currentIndex()
-        action_class = model.data(index, Qt.UserRole)
-        if not isinstance(action_class, str):
-            self.actions_table.create_action(action_class)
+        action_cls = model.data(index, Qt.UserRole)
+        if not isinstance(action_cls, str):
+            self.actions_table.create_action(action_cls)
             self.handle_save()
 
     def delete(self):
@@ -549,8 +561,6 @@ class MainWindow(QMainWindow):
                 return 1
         if self.opened_file_filter == '.mcrc XML (*.mcrc)':
             runner.write_file_xml(self.opened_file, self.actions_table.model().actions.copy(), self.settings)
-        elif self.opened_file_filter == '.mcrc DB (*.mcrc)':
-            runner.write_file_db(self.opened_file, self.actions_table.model().actions.copy(), self.settings)
         elif self.opened_file_filter == '.mcrc CSV (*.mcrc)':
             runner.write_file_csv(self.opened_file, self.actions_table.model().actions.copy(), self.settings)
         else:
