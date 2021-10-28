@@ -152,6 +152,8 @@ def create_table_index(model: Union[QAbstractItemModel, QAbstractTableModel], ro
 class ActionsModel(QAbstractTableModel):
     """Model for actions_table"""
 
+    rowCountChangedSignal = pyqtSignal()
+
     def __init__(self, items: list):
         super().__init__()
         self._data = items
@@ -202,6 +204,7 @@ class ActionsModel(QAbstractTableModel):
         for i in range(count):
             self._data.insert(row + i, None)
         self.endInsertRows()
+        self.rowCountChangedSignal.emit()
         return True
 
     def removeRows(self, row: int, count: int, parent: QModelIndex = ...) -> bool:
@@ -210,6 +213,7 @@ class ActionsModel(QAbstractTableModel):
         for i, j in enumerate(range(count)):
             del self._data[row + j - i]
         self.endRemoveRows()
+        self.rowCountChangedSignal.emit()
         return True
 
     def move_up(self, rows):
@@ -246,6 +250,7 @@ class ActionsModel(QAbstractTableModel):
 class ActionsTable(QTableView):
     addActionSignal = pyqtSignal()
     dataChangedSignal = pyqtSignal()
+    rowCountChangedSignal = pyqtSignal()
     actionAddedSignal = pyqtSignal(int)
 
     def __init__(self, *args, **kwargs):
@@ -267,7 +272,8 @@ class ActionsTable(QTableView):
 
     def setModel(self, model):
         super().setModel(model)
-        self.model().dataChanged.connect(self.dataChangedSignal.emit)
+        model.dataChanged.connect(self.dataChangedSignal.emit)
+        model.rowCountChangedSignal.connect(self.rowCountChangedSignal.emit)
 
     def dragEnterEvent(self, event: QDropEvent):
         if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
@@ -328,8 +334,9 @@ class ActionsTable(QTableView):
         model.insertRow(row)
         index = create_table_index(model, row, 0)
         model.setData(index, action)
-        main_window = self.parent().parent()
-        action.open_edit_dialog(main_window)
+        self.actionAddedSignal.emit(row)
+        # main_window = self.parent().parent()
+        # action.open_edit_dialog(main_window)
 
     def move_up(self):
         rows = self.selected_rows
@@ -407,10 +414,12 @@ class MainWindow(QMainWindow):
         self.init_ui()
 
         self.actions_table.addActionSignal.connect(self.add_new_action)
-        self.actions_table.dataChangedSignal.connect(self.handle_save)
-        self.actions_table.doubleClicked.connect(self.open_action_edit_dialog)
-
         self.new_action_tree.doubleClicked.connect(self.add_new_action)
+        self.actions_table.dataChangedSignal.connect(self.handle_save)
+        self.actions_table.rowCountChangedSignal.connect(self.handle_save)
+        self.actions_table.doubleClicked.connect(self.open_action_edit_dialog)
+        self.actions_table.actionAddedSignal.connect(self.action_added)
+
         self.delete_button.clicked.connect(self.delete)
         self.move_up_button.clicked.connect(self.actions_table.move_up)
         self.move_down_button.clicked.connect(self.actions_table.move_down)
@@ -431,19 +440,24 @@ class MainWindow(QMainWindow):
         self._opened_file = value
         self.setWindowTitle(f'{self._opened_file}[*]')
 
+    def action_added(self, row):
+        model = self.actions_table.model()
+        index = create_table_index(model, row, 0)
+        action = model.data(index, Qt.UserRole)  # get selected action
+        action.open_edit_dialog(self)
+        self.handle_save()
+
     def run(self):
         runner.run(self.actions_table.model().actions.copy(), self.settings)
 
     def open_action_edit_dialog(self):
-        selected_rows = self.actions_table.selected_rows
-        if len(selected_rows) == 1:
-            row = selected_rows[0]
-            model = self.actions_table.model()
-            index = create_table_index(model, row, 0)
-            action = model.data(index, Qt.UserRole)  # get selected action
-            was_changed = action.open_edit_dialog(self)
-            if was_changed:
-                self.force_not_saved()
+        row = self.actions_table.selected_rows[0]
+        model = self.actions_table.model()
+        index = create_table_index(model, row, 0)
+        action = model.data(index, Qt.UserRole)  # get selected action
+        was_changed = action.open_edit_dialog(self)
+        if was_changed:
+            self.force_not_saved()
 
     def add_new_action(self):
         model = self.new_action_tree.model()
@@ -451,14 +465,12 @@ class MainWindow(QMainWindow):
         action_cls = model.data(index, Qt.UserRole)
         if not isinstance(action_cls, str):
             self.actions_table.create_action(action_cls)
-            self.handle_save()
 
     def delete(self):
-        selected_rows = self.actions_table.get_selected_rows()
+        selected_rows = self.actions_table.selected_rows
         if selected_rows:
             for i, row in enumerate(selected_rows):
                 self.actions_table.model().removeRow(row - i)
-            self.handle_save()
 
     def open_settings_dialog(self):
         dialog = SettingsDialog(self, self.settings)
