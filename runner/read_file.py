@@ -2,10 +2,10 @@ from .utils import NAME_CLASS_DICT
 
 
 def read_file_xml(filepath) -> tuple:
-    import xml.etree.ElementTree as ET
+    import xml.etree.ElementTree as ElementTree
 
     actions = []
-    tree = ET.parse(filepath)
+    tree = ElementTree.parse(filepath)
     root = tree.getroot()
     settings = root.attrib
     for child in list(root):

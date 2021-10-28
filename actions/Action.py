@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ElementTree
 import pyautogui
 
 pyautogui.FAILSAFE = False
@@ -21,10 +21,10 @@ class Action(ABC):
     def open_edit_dialog(self, parent) -> bool:
         raise NotImplementedError
 
-    def xml(self):
+    def xml(self) -> ElementTree.Element:
         xml_name = self.xml_name
         parameters = {str(key): str(value) for (key, value) in self.parameters.items()}
-        return ET.Element(xml_name, parameters)
+        return ElementTree.Element(xml_name, parameters)
 
     @abstractmethod
     def run(self):
