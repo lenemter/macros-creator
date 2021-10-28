@@ -1,6 +1,6 @@
 import time
 
-from actions.Action import Action
+from .Action import Action
 from gui.EditDialogs import PauseEditDialog
 
 

@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QApplication
 import sys
-from gui import stylesheet
 
+from gui import stylesheet
 from gui.MainWindow import MainWindow
 
 

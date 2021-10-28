@@ -1,7 +1,7 @@
-from gui.StopDialog import StopDialog
 from PyQt5.QtCore import QObject, pyqtSignal
 import pyautogui
 
+from gui.StopDialog import StopDialog
 from actions import PauseAction
 
 

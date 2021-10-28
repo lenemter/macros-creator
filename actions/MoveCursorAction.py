@@ -1,6 +1,6 @@
 import pyautogui
 
-from actions.Action import Action
+from .Action import Action
 from . import mixins
 from gui.EditDialogs import MoveCursorEditDialog
 
