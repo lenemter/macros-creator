@@ -10,6 +10,7 @@ class PauseEditDialog(EditDialog):
 
         self.duration_doubleSpinBox.setValue(self.action.duration)
 
+    @property
     def properties(self) -> tuple:
         return self.comment_lineEdit.text(), self.duration_doubleSpinBox.value()
 

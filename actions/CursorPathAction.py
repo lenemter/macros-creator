@@ -46,16 +46,12 @@ class CursorPathAction(mixins.PyautoguiStopMixin, Action):
                 'button': self.button,
                 'mouse_path': export_mouse_path(self.mouse_path)}
 
-    def open_edit_dialog(self, parent) -> bool:
+    def open_edit_dialog(self, parent):
         edit_dialog = CursorPathEditDialog.CursorPathEditDialog(parent, self)
         edit_dialog.exec()
 
         if edit_dialog.user_clicked_ok:
-            properties = edit_dialog.properties()
-            was_changed = (self.comment, self.move_type, self.duration, self.button, self.mouse_path) != properties
-            if was_changed:
-                self.comment, self.move_type, self.duration, self.button, self.mouse_path = properties
-            return was_changed
+            self.comment, self.move_type, self.duration, self.button, self.mouse_path = edit_dialog.properties
 
     def run(self):
         if self.mouse_path:

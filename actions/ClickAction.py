@@ -35,18 +35,13 @@ class ClickAction(mixins.PyautoguiStopMixin, Action):
                 'position_y': self.position_y,
                 'restore_cursor': self.restore_cursor}
 
-    def open_edit_dialog(self, parent) -> bool:
+    def open_edit_dialog(self, parent):
         edit_dialog = ClickEditDialog.ClickEditDialog(parent, self)
         edit_dialog.exec()
 
         if edit_dialog.user_clicked_ok:
-            properties = edit_dialog.properties()
-            was_changed = (self.comment, self.action, self.button, self.amount, self.interval, self.move_type,
-                           self.position_x, self.position_y, self.restore_cursor) != properties
-            if was_changed:
-                (self.comment, self.action, self.button, self.amount, self.interval, self.move_type, self.position_x,
-                 self.position_y, self.restore_cursor) = properties
-            return was_changed
+            (self.comment, self.action, self.button, self.amount, self.interval, self.move_type, self.position_x,
+             self.position_y, self.restore_cursor) = edit_dialog.properties
 
     def run(self):
         if self.move_type == 'Absolute':
@@ -54,7 +49,7 @@ class ClickAction(mixins.PyautoguiStopMixin, Action):
         elif self.move_type == 'Relative':
             self.__click_move_relative()
         else:
-            raise ValueError(f'Unknown move typle: {self.move_type}')
+            raise ValueError(f'Unknown move type: {self.move_type}')
 
     def __click_move_absolute(self):
         mouse_position = pyautogui.position()

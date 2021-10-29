@@ -19,7 +19,7 @@ class Action(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def open_edit_dialog(self, parent) -> bool:
+    def open_edit_dialog(self, parent):
         raise NotImplementedError
 
     def xml(self) -> ElementTree.Element:

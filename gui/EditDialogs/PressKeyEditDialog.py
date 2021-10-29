@@ -17,6 +17,11 @@ class PressKeyEditDialog(EditDialog):
         self.action_comboBox.currentTextChanged.connect(self.check_action)
         self.amount_spinBox.valueChanged.connect(self.check_interval)
 
+    @property
+    def properties(self) -> tuple:
+        return (self.comment_lineEdit.text(), self.key_lineEdit.text(), self.action_comboBox.currentText(),
+                self.amount_spinBox.value(), self.interval_doubleSpinBox.value())
+
     def check_action(self) -> None:
         if self.action_comboBox.currentText() != 'Press and release':
             self.amount_spinBox.setDisabled(True)
@@ -29,10 +34,6 @@ class PressKeyEditDialog(EditDialog):
             self.interval_doubleSpinBox.setDisabled(True)
         else:
             self.interval_doubleSpinBox.setDisabled(False)
-
-    def properties(self) -> tuple:
-        return (self.comment_lineEdit.text(), self.key_lineEdit.text(), self.action_comboBox.currentText(),
-                self.amount_spinBox.value(), self.interval_doubleSpinBox.value())
 
     def init_ui(self):
         super().init_ui()

@@ -19,16 +19,12 @@ class PauseAction(Action):
         return {'comment': self.comment,
                 'duration': self.duration}
 
-    def open_edit_dialog(self, parent) -> bool:
+    def open_edit_dialog(self, parent):
         edit_dialog = PauseEditDialog.PauseEditDialog(parent, self)
         edit_dialog.exec()
 
         if edit_dialog.user_clicked_ok:
-            properties = edit_dialog.properties()
-            was_changed = (self.comment, self.duration) != properties
-            if was_changed:
-                self.comment, self.duration = properties
-            return was_changed
+            self.comment, self.duration = edit_dialog.properties
 
     def run(self):
         for _ in range(int(self.duration // 0.25)):

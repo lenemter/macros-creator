@@ -153,8 +153,6 @@ def create_table_index(model: Union[QAbstractItemModel, QAbstractTableModel], ro
 class ActionsModel(QAbstractTableModel):
     """Model for actions_table"""
 
-    rowCountChangedSignal = pyqtSignal()
-
     def __init__(self, items: list):
         super().__init__()
         self._data = items
@@ -205,7 +203,6 @@ class ActionsModel(QAbstractTableModel):
         for i in range(count):
             self._data.insert(row + i, None)
         self.endInsertRows()
-        self.rowCountChangedSignal.emit()
         return True
 
     def removeRows(self, row: int, count: int, parent: QModelIndex = ...) -> bool:
@@ -214,7 +211,6 @@ class ActionsModel(QAbstractTableModel):
         for i, j in enumerate(range(count)):
             del self._data[row + j - i]
         self.endRemoveRows()
-        self.rowCountChangedSignal.emit()
         return True
 
     def move_up(self, rows):
@@ -250,8 +246,6 @@ class ActionsModel(QAbstractTableModel):
 
 class ActionsTable(QTableView):
     addActionSignal = pyqtSignal()
-    dataChangedSignal = pyqtSignal()
-    rowCountChangedSignal = pyqtSignal()
     actionAddedSignal = pyqtSignal(int)
 
     def __init__(self, *args, **kwargs):
@@ -270,11 +264,6 @@ class ActionsTable(QTableView):
     @property
     def selected_rows(self) -> list:
         return sorted(set(index.row() for index in self.selectedIndexes()))
-
-    def setModel(self, model):
-        super().setModel(model)
-        model.dataChanged.connect(self.dataChangedSignal.emit)
-        model.rowCountChangedSignal.connect(self.rowCountChangedSignal.emit)
 
     def dragEnterEvent(self, event: QDropEvent):
         if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
@@ -416,8 +405,6 @@ class MainWindow(QMainWindow):
 
         self.actions_table.addActionSignal.connect(self.add_new_action)
         self.new_action_tree.doubleClicked.connect(self.add_new_action)
-        self.actions_table.dataChangedSignal.connect(self.handle_save)
-        self.actions_table.rowCountChangedSignal.connect(self.handle_save)
         self.actions_table.doubleClicked.connect(self.open_action_edit_dialog)
         self.actions_table.actionAddedSignal.connect(self.action_added)
 
@@ -446,7 +433,6 @@ class MainWindow(QMainWindow):
         index = create_table_index(model, row, 0)
         action = model.data(index, Qt.UserRole)  # get selected action
         action.open_edit_dialog(self)
-        self.handle_save()
 
     def run(self):
         runner.run(self.actions_table.model().actions.copy(), self.settings)
@@ -456,9 +442,7 @@ class MainWindow(QMainWindow):
         model = self.actions_table.model()
         index = create_table_index(model, row, 0)
         action = model.data(index, Qt.UserRole)  # get selected action
-        was_changed = action.open_edit_dialog(self)
-        if was_changed:
-            self.force_not_saved()
+        action.open_edit_dialog(self)
 
     def add_new_action(self):
         model = self.new_action_tree.model()
@@ -478,15 +462,6 @@ class MainWindow(QMainWindow):
         dialog.exec()
         self.settings = dialog.get_settings()
 
-    def force_not_saved(self):
-        self.setWindowModified(True)
-
-    def handle_save(self):
-        if self.actions_table.model().actions != self.last_saved_actions:
-            self.setWindowModified(True)
-        else:
-            self.setWindowModified(False)
-
     def new_file(self):
         file_dialog = QFileDialog(self,
                                   'Create new file',
@@ -496,27 +471,24 @@ class MainWindow(QMainWindow):
         file_dialog.setAcceptMode(QFileDialog.AcceptSave)
         file_dialog.setDefaultSuffix('mcrc')
         if file_dialog.exec() == QFileDialog.Accepted:
-            if self.isWindowModified():
-                reply = QMessageBox.warning(self,
-                                            'Save changes',
-                                            'Do you want to save your changes?',
-                                            QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
-                if reply == QMessageBox.Save:
-                    return_code = self.save_file()
-                    if return_code == 1:  # If user did not save the file
-                        return
-                elif reply == QMessageBox.Discard:
-                    pass
-                else:
+            reply = QMessageBox.warning(self,
+                                        'Save changes',
+                                        'Do you want to save your changes?',
+                                        QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
+            if reply == QMessageBox.Save:
+                return_code = self.save_file()
+                if return_code == 1:  # If user did not save the file
                     return
+            elif reply == QMessageBox.Discard:
+                pass
+            else:
+                return
 
             self.opened_file = file_dialog.selectedFiles()[0]
             self.opened_file_filter = file_dialog.selectedMimeTypeFilter()
             with open(self.opened_file, mode='w', encoding='UTF-8') as _:
                 pass
             self.actions_table.setModel(ActionsModel([]))
-            self.last_saved_actions = []
-            self.handle_save()
 
     def open_file(self):
         file_dialog = QFileDialog(self,
@@ -527,19 +499,18 @@ class MainWindow(QMainWindow):
         file_dialog.setAcceptMode(QFileDialog.AcceptOpen)
         file_dialog.setDefaultSuffix('mcrc')
         if file_dialog.exec() == QFileDialog.Accepted:
-            if self.isWindowModified():
-                reply = QMessageBox.warning(self,
-                                            'Save changes',
-                                            'Do you want to save your changes?',
-                                            QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
-                if reply == QMessageBox.Save:
-                    return_code = self.save_file()
-                    if return_code == 1:  # If user did not save the file
-                        return
-                elif reply == QMessageBox.Discard:
-                    pass
-                else:
+            reply = QMessageBox.warning(self,
+                                        'Save changes',
+                                        'Do you want to save your changes?',
+                                        QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
+            if reply == QMessageBox.Save:
+                return_code = self.save_file()
+                if return_code == 1:  # If user did not save the file
                     return
+            elif reply == QMessageBox.Discard:
+                pass
+            else:
+                return
 
             self.opened_file = file_dialog.selectedFiles()[0]
             self.opened_file_filter = file_dialog.selectedNameFilter()
@@ -552,8 +523,6 @@ class MainWindow(QMainWindow):
                 raise ValueError('Unknown file format')
 
             self.actions_table.setModel(ActionsModel(actions))
-            self.last_saved_actions = actions.copy()
-            self.handle_save()
 
     def save_file(self) -> Optional[int]:
         if self.opened_file == DEFAULT_OPENED_FILE:
@@ -565,22 +534,19 @@ class MainWindow(QMainWindow):
             file_dialog.setAcceptMode(QFileDialog.AcceptSave)
             file_dialog.setDefaultSuffix('mcrc')
             if file_dialog.exec() == QFileDialog.Accepted:
-                if self.isWindowModified():
-                    self.opened_file = file_dialog.selectedFiles()[0]
-                    self.opened_file_filter = file_dialog.selectedNameFilter()
-                    with open(self.opened_file, mode='w', encoding='UTF-8') as _:
-                        pass
+                self.opened_file = file_dialog.selectedFiles()[0]
+                self.opened_file_filter = file_dialog.selectedNameFilter()
+                with open(self.opened_file, mode='w', encoding='UTF-8') as _:
+                    pass
             else:
                 return 1
+
         if self.opened_file_filter == '.mcrc XML (*.mcrc)':
             runner.write_file_xml(self.opened_file, self.actions_table.model().actions.copy(), self.settings)
         elif self.opened_file_filter == '.mcrc CSV (*.mcrc)':
             runner.write_file_csv(self.opened_file, self.actions_table.model().actions.copy(), self.settings)
         else:
             raise ValueError('Unknown file format')
-
-        self.last_saved_actions = self.actions_table.model().actions.copy()
-        self.handle_save()
 
     def init_ui(self):
         self.setWindowModified(False)

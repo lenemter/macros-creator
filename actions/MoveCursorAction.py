@@ -26,17 +26,13 @@ class MoveCursorAction(mixins.PyautoguiStopMixin, Action):
                 'duration': self.duration,
                 'button': self.button}
 
-    def open_edit_dialog(self, parent) -> bool:
+    def open_edit_dialog(self, parent):
         edit_dialog = MoveCursorEditDialog.MoveCursorEditDialog(parent, self)
         edit_dialog.exec()
 
         if edit_dialog.user_clicked_ok:
-            properties = edit_dialog.properties()
-            was_changed = (self.comment, self.move_type, self.position_x, self.position_y, self.duration,
-                           self.button) != properties
-            if was_changed:
-                self.comment, self.move_type, self.position_x, self.position_y, self.duration, self.button = properties
-            return was_changed
+            (self.comment, self.move_type, self.position_x, self.position_y, self.duration,
+             self.button) = edit_dialog.properties
 
     def run(self):
         if self.button == 'None':

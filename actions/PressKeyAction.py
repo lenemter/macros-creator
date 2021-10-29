@@ -24,16 +24,12 @@ class PressKeyAction(mixins.PyautoguiStopMixin, Action):
                 'amount': self.amount,
                 'interval': self.interval}
 
-    def open_edit_dialog(self, parent) -> bool:
+    def open_edit_dialog(self, parent):
         edit_dialog = PressKeyEditDialog.PressKeyEditDialog(parent, self)
         edit_dialog.exec()
 
         if edit_dialog.user_clicked_ok:
-            properties = edit_dialog.properties()
-            was_changed = (self.comment, self.key, self.action, self.amount, self.interval) != properties
-            if was_changed:
-                self.comment, self.key, self.action, self.amount, self.interval = properties
-            return was_changed
+            self.comment, self.key, self.action, self.amount, self.interval = edit_dialog.properties
 
     def run(self):
         # Import is here because at the top of the file it triggers PauseAction import
