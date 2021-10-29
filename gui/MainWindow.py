@@ -462,6 +462,20 @@ class MainWindow(QMainWindow):
         dialog.exec()
         self.settings = dialog.get_settings()
 
+    def ask_save_question(self):
+        message_box = QMessageBox(self)
+        message_box.setIcon(QMessageBox.Warning)
+        message_box.setText('Do you want to save your changes?')
+        message_box.setWindowTitle('Save changes')
+        close_button = QPushButton(QIcon(get_icon_path('icons/edit-delete.svg')), 'Close without saving')
+        message_box.addButton(close_button, QMessageBox.DestructiveRole)
+        cancel_button = QPushButton(QIcon(get_icon_path('icons/dialog-cancel.svg')), 'Cancel')
+        message_box.addButton(cancel_button, QMessageBox.RejectRole)
+        save_button = QPushButton(QIcon(get_icon_path('icons/document-save.svg')), 'Save')
+        message_box.addButton(save_button, QMessageBox.AcceptRole)
+
+        return message_box.exec()
+
     def new_file(self):
         file_dialog = QFileDialog(self,
                                   'Create new file',
@@ -471,15 +485,12 @@ class MainWindow(QMainWindow):
         file_dialog.setAcceptMode(QFileDialog.AcceptSave)
         file_dialog.setDefaultSuffix('mcrc')
         if file_dialog.exec() == QFileDialog.Accepted:
-            reply = QMessageBox.warning(self,
-                                        'Save changes',
-                                        'Do you want to save your changes?',
-                                        QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
-            if reply == QMessageBox.Save:
+            reply = self.ask_save_question()
+            if reply == QMessageBox.Accepted:
                 return_code = self.save_file()
                 if return_code == 1:  # If user did not save the file
                     return
-            elif reply == QMessageBox.Discard:
+            elif reply == QMessageBox.NoButton:  # WHY NOBUTTON == DESTRUCTIVEROLE
                 pass
             else:
                 return
@@ -499,15 +510,12 @@ class MainWindow(QMainWindow):
         file_dialog.setAcceptMode(QFileDialog.AcceptOpen)
         file_dialog.setDefaultSuffix('mcrc')
         if file_dialog.exec() == QFileDialog.Accepted:
-            reply = QMessageBox.warning(self,
-                                        'Save changes',
-                                        'Do you want to save your changes?',
-                                        QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
-            if reply == QMessageBox.Save:
+            reply = self.ask_save_question()
+            if reply == QMessageBox.Accepted:
                 return_code = self.save_file()
                 if return_code == 1:  # If user did not save the file
                     return
-            elif reply == QMessageBox.Discard:
+            elif reply == QMessageBox.NoButton:  # WHY NOBUTTON == DESTRUCTIVEROLE
                 pass
             else:
                 return
@@ -650,11 +658,11 @@ class MainWindow(QMainWindow):
         self.menu_file = QMenu('File')
         self.menubar.addAction(self.menu_file.menuAction())
 
-        self.action_new = QAction('New')
+        self.action_new = QAction(QIcon(get_icon_path('icons/document-new.svg')), 'New')
         self.action_new.setShortcut('Ctrl+N')
-        self.action_open = QAction('Open')
+        self.action_open = QAction(QIcon(get_icon_path('icons/document-open.svg')), 'Open')
         self.action_open.setShortcut('Ctrl+O')
-        self.action_save = QAction('Save')
+        self.action_save = QAction(QIcon(get_icon_path('icons/document-save.svg')), 'Save')
         self.action_save.setShortcut('Ctrl+S')
 
         self.menu_file.addAction(self.action_new)
