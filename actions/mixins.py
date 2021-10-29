@@ -8,6 +8,7 @@ class PyautoguiStopMixin:
         pyautogui.FAILSAFE = True
         try:
             while True:
+                pyautogui.FAILSAFE = True
                 pyautogui.moveTo(x=0, y=0)
         except pyautogui.FailSafeException:
             pass
