@@ -1,8 +1,8 @@
 import pyautogui
 
-from .Action import Action
-from . import mixins
 from gui.EditDialogs import PressKeyEditDialog
+from . import mixins
+from .Action import Action
 
 
 class PressKeyAction(mixins.PyautoguiStopMixin, Action):

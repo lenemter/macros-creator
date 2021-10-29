@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QLabel, QComboBox, QSpinBox, QDoubleSpinBox
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QLabel, QComboBox, QSpinBox, QDoubleSpinBox
 
 from gui.EditDialogs.EditDialog import EditDialog
 
@@ -27,7 +27,8 @@ class MoveCursorEditDialog(EditDialog):
 
     def properties(self) -> tuple:
         return (self.comment_lineEdit.text(), self.move_type_comboBox.currentText(), self.position_x_spinBox.value(),
-                self.position_y_spinBox.value(), self.duration_doubleSpinBox.value(), self.button_comboBox.currentText())
+                self.position_y_spinBox.value(), self.duration_doubleSpinBox.value(),
+                self.button_comboBox.currentText())
 
     def init_ui(self):
         super().init_ui()

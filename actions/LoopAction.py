@@ -1,7 +1,7 @@
 from typing import Optional
 
-from .Action import Action
 from gui.EditDialogs import LoopEditDialog
+from .Action import Action
 
 
 class LoopAction(Action):

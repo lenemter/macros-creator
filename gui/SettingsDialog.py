@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy, QGridLayout, QFrame, QDoubleSpinBox
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy, QGridLayout, QFrame, QDoubleSpinBox
 
 
 class HorizontalLine(QFrame):

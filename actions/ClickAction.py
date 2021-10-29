@@ -1,8 +1,8 @@
 import pyautogui
 
-from .Action import Action
-from . import mixins
 from gui.EditDialogs import ClickEditDialog
+from . import mixins
+from .Action import Action
 
 
 class ClickAction(mixins.PyautoguiStopMixin, Action):

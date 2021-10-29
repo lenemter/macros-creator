@@ -1,15 +1,16 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTreeView, QPushButton, QMenuBar, QMenu, QAction, \
-    QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox, QSpacerItem
-from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, QSize, pyqtSignal, QDir, \
-    QItemSelectionModel
-from PyQt5.QtGui import QFont, QIcon, QDropEvent, QDragMoveEvent
 from pathlib import Path
 from typing import Optional, Any, Union
 
-from actions.Action import Action
-from gui.icons_handler import get_icon_path, get_action_icon
-from gui.SettingsDialog import SettingsDialog
+from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, QSize, pyqtSignal, QDir, \
+    QItemSelectionModel
+from PyQt5.QtGui import QFont, QIcon, QDropEvent, QDragMoveEvent
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTreeView, QPushButton, QMenuBar, QMenu, QAction, \
+    QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox, QSpacerItem
+
 import runner
+from actions.Action import Action
+from gui.SettingsDialog import SettingsDialog
+from gui.icons_handler import get_icon_path, get_action_icon
 
 HOME = str(Path.home())
 DEFAULT_OPENED_FILE = 'untitled.mcrc'
@@ -544,9 +545,9 @@ class MainWindow(QMainWindow):
             self.opened_file_filter = file_dialog.selectedNameFilter()
 
             if self.opened_file_filter == '.mcrc XML (*.mcrc)':
-                actions, settings = runner.read_file_xml(self.opened_file)
+                actions, self.settings = runner.read_file_xml(self.opened_file)
             elif self.opened_file_filter == '.mcrc CSV (*.mcrc)':
-                actions, settings = runner.read_file_csv(self.opened_file)
+                actions, self.settings = runner.read_file_csv(self.opened_file)
             else:
                 raise ValueError('Unknown file format')
 

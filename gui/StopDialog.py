@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QSizePolicy, QPushButton
 from PyQt5.QtCore import QThread, Qt
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QSizePolicy, QPushButton
 
 
 class StopDialog(QDialog):

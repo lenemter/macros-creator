@@ -1,7 +1,7 @@
 import pyautogui
 
-from .Action import Action
 from gui.EditDialogs import WriteTextEditDialog
+from .Action import Action
 
 
 class WriteTextAction(Action):

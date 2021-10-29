@@ -1,8 +1,8 @@
 import pyautogui
 
+from gui.EditDialogs import CursorPathEditDialog
 from . import Action
 from . import mixins
-from gui.EditDialogs import CursorPathEditDialog
 
 
 def load_mouse_path(mouse_path: str) -> list:

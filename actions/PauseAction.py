@@ -1,7 +1,7 @@
 import time
 
-from .Action import Action
 from gui.EditDialogs import PauseEditDialog
+from .Action import Action
 
 
 class PauseAction(Action):

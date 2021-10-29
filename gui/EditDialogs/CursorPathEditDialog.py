@@ -1,6 +1,6 @@
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel, QComboBox, QHBoxLayout, QPushButton, QTableWidget, QSpinBox, QHeaderView, \
     QAbstractItemView, QMessageBox, QDoubleSpinBox
-from PyQt5.QtCore import Qt
 
 from gui.EditDialogs.EditDialog import EditDialog
 

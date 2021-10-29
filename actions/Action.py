@@ -1,5 +1,6 @@
-from abc import ABC, abstractmethod
 import xml.etree.ElementTree as ElementTree
+from abc import ABC, abstractmethod
+
 import pyautogui
 
 pyautogui.FAILSAFE = False
