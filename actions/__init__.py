@@ -6,3 +6,4 @@ from .PressKeyAction import PressKeyAction
 from .WriteTextAction import WriteTextAction
 from .PauseAction import PauseAction
 from .LoopAction import LoopAction
+from .GotoAction import GotoAction
