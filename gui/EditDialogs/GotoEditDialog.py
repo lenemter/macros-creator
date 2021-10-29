@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QLabel, QComboBox, QSpinBox
+from PyQt5.QtWidgets import QLabel, QComboBox
 
 from gui.EditDialogs.EditDialog import EditDialog
 

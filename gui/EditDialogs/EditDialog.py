@@ -1,6 +1,24 @@
+import sys
+from pathlib import Path
+
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QDialogButtonBox, QSpacerItem, \
-    QSizePolicy, QGridLayout, QFrame
+    QSizePolicy, QGridLayout, QFrame, QPushButton
+
+
+# this function is here because of circular import :(
+def get_icon_path(path: str) -> str:
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    path = Path(path)
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = Path(sys._MEIPASS)
+        path = path.name
+    except AttributeError:
+        base_path = Path(__file__).parent.resolve()
+
+    return str(base_path / path)
 
 
 class HorizontalLine(QFrame):
@@ -89,5 +107,9 @@ class EditDialog(QDialog):
         self.buttons_line = HorizontalLine()
         self.layout.addWidget(self.buttons_line)
 
-        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.button_box = QDialogButtonBox()
+        self.ok_button = QPushButton(QIcon(get_icon_path('../icons/dialog-ok-apply.svg')), 'Ok')
+        self.button_box.addButton(self.ok_button, QDialogButtonBox.AcceptRole)
+        self.cancel_button = QPushButton(QIcon(get_icon_path('../icons/dialog-cancel.svg')), 'Cancel')
+        self.button_box.addButton(self.cancel_button, QDialogButtonBox.RejectRole)
         self.layout.addWidget(self.button_box)
