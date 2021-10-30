@@ -1,3 +1,4 @@
+import traceback
 from pathlib import Path
 from typing import Optional, Any, Union
 
@@ -435,7 +436,10 @@ class MainWindow(QMainWindow):
         action.open_edit_dialog(self)
 
     def run(self):
-        runner.run(self.actions_table.model().actions.copy(), self.settings)
+        try:
+            runner.run(self.actions_table.model().actions.copy(), self.settings)
+        except Exception as e:
+            self.handle_exception(e)
 
     def open_action_edit_dialog(self):
         row = self.actions_table.selected_rows[0]
@@ -462,7 +466,11 @@ class MainWindow(QMainWindow):
         dialog.exec()
         self.settings = dialog.get_settings()
 
-    def ask_save_question(self):
+    def ask_save_question(self) -> QMessageBox.ButtonRole:
+        """
+        Asks user to save his work
+        Used in new_file() and open_file()
+        """
         message_box = QMessageBox(self)
         message_box.setIcon(QMessageBox.Warning)
         message_box.setText('Do you want to save your changes?')
@@ -473,8 +481,25 @@ class MainWindow(QMainWindow):
         message_box.addButton(cancel_button, QMessageBox.RejectRole)
         save_button = QPushButton(QIcon(get_icon_path('icons/document-save.svg')), 'Save')
         message_box.addButton(save_button, QMessageBox.AcceptRole)
+        message_box.exec()
+        return message_box.buttonRole(message_box.clickedButton())
 
-        return message_box.exec()
+    def show_error(self, message: str, detailed_text=None):
+        message_box = QMessageBox(self)
+        message_box.setWindowTitle("Error")
+        message_box.setIcon(QMessageBox.Critical)
+        message_box.setText(message)
+
+        ok_button = QPushButton(QIcon(get_icon_path('icons/dialog-ok-apply.svg')), 'Ok')
+        message_box.addButton(ok_button, QMessageBox.AcceptRole)
+
+        if detailed_text is not None:
+            message_box.setDetailedText(detailed_text)
+
+        message_box.exec()
+
+    def handle_exception(self, e):
+        self.show_error(f'An error occurred: {getattr(e, "message", repr(e))}', str(traceback.format_exc()))
 
     def new_file(self):
         file_dialog = QFileDialog(self,
@@ -490,7 +515,7 @@ class MainWindow(QMainWindow):
                 return_code = self.save_file()
                 if return_code == 1:  # If user did not save the file
                     return
-            elif reply == QMessageBox.NoButton:  # WHY NOBUTTON == DESTRUCTIVEROLE
+            elif reply == QMessageBox.NoButton:
                 pass
             else:
                 return
@@ -511,11 +536,11 @@ class MainWindow(QMainWindow):
         file_dialog.setDefaultSuffix('mcrc')
         if file_dialog.exec() == QFileDialog.Accepted:
             reply = self.ask_save_question()
-            if reply == QMessageBox.Accepted:
+            if reply == QMessageBox.AcceptRole:
                 return_code = self.save_file()
                 if return_code == 1:  # If user did not save the file
                     return
-            elif reply == QMessageBox.NoButton:  # WHY NOBUTTON == DESTRUCTIVEROLE
+            elif reply == QMessageBox.DestructiveRole:
                 pass
             else:
                 return
@@ -524,9 +549,17 @@ class MainWindow(QMainWindow):
             self.opened_file_filter = file_dialog.selectedNameFilter()
 
             if self.opened_file_filter == '.mcrc XML (*.mcrc)':
-                actions, self.settings = runner.read_file_xml(self.opened_file)
+                try:
+                    actions, self.settings = runner.read_file_xml(self.opened_file)
+                except Exception as e:
+                    self.handle_exception(e)
+                    return
             elif self.opened_file_filter == '.mcrc CSV (*.mcrc)':
-                actions, self.settings = runner.read_file_csv(self.opened_file)
+                try:
+                    actions, self.settings = runner.read_file_csv(self.opened_file)
+                except Exception as e:
+                    self.handle_exception(e)
+                    return
             else:
                 raise ValueError('Unknown file format')
 
