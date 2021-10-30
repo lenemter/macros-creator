@@ -262,6 +262,14 @@ class ActionsTable(QTableView):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setDragDropMode(QAbstractItemView.InternalMove)
 
+        self.horizontalHeader().resizeSection(0, 150)
+        self.horizontalHeader().setStretchLastSection(True)
+        font = self.horizontalHeader().font()
+        font.setBold(True)
+        self.horizontalHeader().setFont(font)
+
+        self.setModel(ActionsModel([]))
+
     @property
     def selected_rows(self) -> list:
         return sorted(set(index.row() for index in self.selectedIndexes()))
@@ -602,14 +610,9 @@ class MainWindow(QMainWindow):
         self.layout.setSpacing(4)
         self.centralWidget.setLayout(self.layout)
 
-        # New action layout
-        self.new_action_layout = QVBoxLayout()
-        self.new_action_layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.addLayout(self.new_action_layout)
-
         # New action tree
         self.new_action_tree = QTreeView()
-        self.new_action_layout.addWidget(self.new_action_tree)
+        self.layout.addWidget(self.new_action_tree)
         self.new_action_tree.setHeaderHidden(True)
         self.new_action_tree.setDragDropMode(QAbstractItemView.DragOnly)
         items = create_action_tree_items()
@@ -668,18 +671,10 @@ class MainWindow(QMainWindow):
         # Actions table
         self.actions_table = ActionsTable()
         self.right_layout.addWidget(self.actions_table)
-        self.actions_table.horizontalHeader().resizeSection(0, 150)
-        self.actions_table.horizontalHeader().setStretchLastSection(True)
-        font = self.actions_table.horizontalHeader().font()
-        font.setBold(True)
-        self.actions_table.horizontalHeader().setFont(font)
-
-        model = ActionsModel([])
-        self.actions_table.setModel(model)
 
         # Layouts stretch
         self.right_layout.setStretch(0, 0)
-        self.right_layout.setStretch(1, 8)
+        self.right_layout.setStretch(1, 1)
         self.layout.setStretch(0, 0)
         self.layout.setStretch(1, 1)
 
