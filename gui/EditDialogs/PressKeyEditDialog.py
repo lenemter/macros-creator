@@ -23,8 +23,8 @@ class PressKeyEditDialog(EditDialog):
                 self.amount_spinBox.value(), self.interval_doubleSpinBox.value())
 
     def check_action(self):
-        """Disable amount spinbox if action is not 'Click'"""
-        if self.action_comboBox.currentText() == 'Click':
+        """Disable amount spinbox if action is not 'Press and release'"""
+        if self.action_comboBox.currentText() == 'Press and release':
             self.amount_spinBox.setDisabled(False)
         else:
             self.amount_spinBox.setDisabled(True)
@@ -44,9 +44,15 @@ class PressKeyEditDialog(EditDialog):
         self.key_label = QLabel('Key:')  # Label
         self.key_label.setAlignment(Qt.AlignRight)
         self.key_lineEdit = QLineEdit()  # LineEdit
+        self.link = QLabel('<a href="https://pyautogui.readthedocs.io/en/latest/keyboard.html#keyboard-keys"'
+                           '>Available keys</a>')
+        self.link.setTextFormat(Qt.RichText)
+        self.link.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        self.link.setOpenExternalLinks(True)
 
         self.properties_grid.addWidget(self.key_label, 0, 0)
         self.properties_grid.addWidget(self.key_lineEdit, 0, 1)
+        self.properties_grid.addWidget(self.link, 1, 1)
 
         # Action
         self.action_label = QLabel('Action:')  # Label
@@ -54,8 +60,8 @@ class PressKeyEditDialog(EditDialog):
         self.action_comboBox = QComboBox()  # ComboBox
         self.action_comboBox.addItems(('Press and release', 'Press', 'Release'))
 
-        self.properties_grid.addWidget(self.action_label, 1, 0)
-        self.properties_grid.addWidget(self.action_comboBox, 1, 1)
+        self.properties_grid.addWidget(self.action_label, 2, 0)
+        self.properties_grid.addWidget(self.action_comboBox, 2, 1)
 
         # Amount
         self.amount_label = QLabel('Amount:')  # Label
@@ -63,13 +69,13 @@ class PressKeyEditDialog(EditDialog):
         self.amount_spinBox = QSpinBox()  # SpinBox
         self.amount_spinBox.setMinimum(1)
 
-        self.properties_grid.addWidget(self.amount_label, 2, 0)
-        self.properties_grid.addWidget(self.amount_spinBox, 2, 1)
+        self.properties_grid.addWidget(self.amount_label, 3, 0)
+        self.properties_grid.addWidget(self.amount_spinBox, 3, 1)
 
         # Interval
         self.interval_label = QLabel("Interval:")  # Label
         self.interval_label.setAlignment(Qt.AlignRight)
         self.interval_doubleSpinBox = QDoubleSpinBox()  # DoubleSpinBox
 
-        self.properties_grid.addWidget(self.interval_label, 3, 0)
-        self.properties_grid.addWidget(self.interval_doubleSpinBox, 3, 1)
+        self.properties_grid.addWidget(self.interval_label, 4, 0)
+        self.properties_grid.addWidget(self.interval_doubleSpinBox, 4, 1)

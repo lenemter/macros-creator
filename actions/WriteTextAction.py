@@ -48,4 +48,4 @@ class WriteTextAction(Action):
         self.__stop_flag = True
 
     def reset_stop(self):
-        self.__stop_flag = Fasle
+        self.__stop_flag = False

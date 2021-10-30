@@ -9,7 +9,7 @@ class MoveCursorEditDialog(EditDialog):
         super().__init__(parent, action)
 
         self.move_type_comboBox.setCurrentText(self.action.move_type)
-        self.set_spinBoxes_ranges()
+        self.set_position_ranges()
         self.position_x_spinBox.setValue(self.action.position_x)
         self.position_y_spinBox.setValue(self.action.position_y)
         self.duration_doubleSpinBox.setValue(self.action.duration)

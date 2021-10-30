@@ -24,9 +24,14 @@ class WriteTextEditDialog(EditDialog):
         self.text_label = QLabel("Text:")  # Label
         self.text_label.setAlignment(Qt.AlignRight)
         self.text_textEdit = QTextEdit()  # TextEdit
+        self.text_desctiption = QLabel('Only works with English layout. '
+                                       'If you want to write in others languages write in English '
+                                       'and change layout for executing')
+        self.text_desctiption.setWordWrap(True)
 
         self.properties_grid.addWidget(self.text_label, 0, 0)
         self.properties_grid.addWidget(self.text_textEdit, 0, 1)
+        self.properties_grid.addWidget(self.text_desctiption, 1, 1)
 
         # Amount
         self.amount_label = QLabel('Amount:')  # Label
@@ -34,13 +39,13 @@ class WriteTextEditDialog(EditDialog):
         self.amount_spinBox = QSpinBox()  # SpinBox
         self.amount_spinBox.setMinimum(1)
 
-        self.properties_grid.addWidget(self.amount_label, 1, 0)
-        self.properties_grid.addWidget(self.amount_spinBox, 1, 1)
+        self.propgiterties_grid.addWidget(self.amount_label, 2, 0)
+        self.properties_grid.addWidget(self.amount_spinBox, 2, 1)
 
         # Interval
         self.interval_label = QLabel("Interval:")  # Label
         self.interval_label.setAlignment(Qt.AlignRight)
         self.interval_doubleSpinBox = QDoubleSpinBox()  # DoubleSpinBox
 
-        self.properties_grid.addWidget(self.interval_label, 2, 0)
-        self.properties_grid.addWidget(self.interval_doubleSpinBox, 2, 1)
+        self.properties_grid.addWidget(self.interval_label, 3, 0)
+        self.properties_grid.addWidget(self.interval_doubleSpinBox, 3, 1)
