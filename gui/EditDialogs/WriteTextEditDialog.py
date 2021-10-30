@@ -19,6 +19,8 @@ class WriteTextEditDialog(EditDialog):
 
     def init_ui(self):
         super().init_ui()
+        self.resize(400, 440)
+        self.setMinimumSize(400, 440)
 
         # Text
         self.text_label = QLabel("Text:")  # Label
@@ -39,7 +41,7 @@ class WriteTextEditDialog(EditDialog):
         self.amount_spinBox = QSpinBox()  # SpinBox
         self.amount_spinBox.setMinimum(1)
 
-        self.propgiterties_grid.addWidget(self.amount_label, 2, 0)
+        self.properties_grid.addWidget(self.amount_label, 2, 0)
         self.properties_grid.addWidget(self.amount_spinBox, 2, 1)
 
         # Interval

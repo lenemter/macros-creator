@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macro time_between="0.0">
+	<move_cursor comment="Left" move_type="Relative" position_x="300" position_y="0" duration="0.5" button="None"/>
+	<move_cursor comment="Down" move_type="Relative" position_x="0" position_y="300" duration="0.5" button="None"/>
+	<move_cursor comment="Right" move_type="Relative" position_x="-300" position_y="0" duration="0.5" button="None"/>
+	<move_cursor comment="Up" move_type="Relative" position_x="0" position_y="-300" duration="0.5" button="None"/>
+	<goto comment="Goto 1" loop_start="1"/>
+</macro>

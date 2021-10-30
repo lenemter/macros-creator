@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macro time_between="0.0">
+	<click comment="" action="Click" button="Left" amount="99" interval="0.0" move_type="Relative" position_x="0" position_y="0" restore_cursor="0"/>
+	<goto comment="Goto 1" loop_start="1"/>
+</macro>

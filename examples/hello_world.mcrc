@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macro time_between="0.0">
+	<write_text comment="Hello, World!" text="Hello, World!
+" amount="10" interval="0.5"/>
+</macro>

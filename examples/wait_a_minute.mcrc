@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macro time_between="0.0">
+	<pause comment="Minute" duration="60.0"/>
+</macro>
