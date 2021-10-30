@@ -22,15 +22,17 @@ class PressKeyEditDialog(EditDialog):
         return (self.comment_lineEdit.text(), self.key_lineEdit.text(), self.action_comboBox.currentText(),
                 self.amount_spinBox.value(), self.interval_doubleSpinBox.value())
 
-    def check_action(self) -> None:
-        if self.action_comboBox.currentText() != 'Press and release':
-            self.amount_spinBox.setDisabled(True)
-        else:
+    def check_action(self):
+        """Disable amount spinbox if action is not 'Click'"""
+        if self.action_comboBox.currentText() == 'Click':
             self.amount_spinBox.setDisabled(False)
+        else:
+            self.amount_spinBox.setDisabled(True)
         self.check_interval()
 
-    def check_interval(self) -> None:
-        if any((self.amount_spinBox.value() == 1, not self.amount_spinBox.isEnabled())):
+    def check_interval(self):
+        """Disable interval spinbox if amount == 1 or disabled"""
+        if any((self.amount_spinBox.value() == 1, not self.amount_spinBox.isEnabled())):  # if amount == 1 or disabled
             self.interval_doubleSpinBox.setDisabled(True)
         else:
             self.interval_doubleSpinBox.setDisabled(False)
@@ -50,7 +52,7 @@ class PressKeyEditDialog(EditDialog):
         self.action_label = QLabel('Action:')  # Label
         self.action_label.setAlignment(Qt.AlignRight)
         self.action_comboBox = QComboBox()  # ComboBox
-        self.action_comboBox.addItems(['Press and release', 'Press', 'Release'])
+        self.action_comboBox.addItems(('Press and release', 'Press', 'Release'))
 
         self.properties_grid.addWidget(self.action_label, 1, 0)
         self.properties_grid.addWidget(self.action_comboBox, 1, 1)

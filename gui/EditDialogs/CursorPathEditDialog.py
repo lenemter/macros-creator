@@ -10,7 +10,7 @@ class PointsTable(QTableWidget):
         super().__init__()
         self.setColumnCount(2)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.setHorizontalHeaderLabels(['X', 'Y'])
+        self.setHorizontalHeaderLabels(('X', 'Y'))
 
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
@@ -18,10 +18,11 @@ class PointsTable(QTableWidget):
         self.range_state = 'Absolute'
         self.update_ranges()
 
-    def get_selected_rows(self) -> list:
+    @property
+    def selected_rows(self) -> list:
         return list(set(item.row() for item in self.selectedIndexes()))
 
-    def update_ranges(self) -> None:
+    def update_ranges(self):
         if self.range_state == 'Absolute':
             spinbox_min = 0
         else:
@@ -32,13 +33,13 @@ class PointsTable(QTableWidget):
                 spin_box = self.cellWidget(i, j)
                 spin_box.setMinimum(spinbox_min)
 
-    def fill_table(self, points) -> None:
+    def fill_table(self, points):
         for x, y in points:
             self.add_point()
             self.cellWidget(self.rowCount() - 1, 0).setValue(x)
             self.cellWidget(self.rowCount() - 1, 1).setValue(y)
 
-    def add_point(self) -> None:
+    def add_point(self):
         self.setRowCount(self.rowCount() + 1)
 
         for i in range(self.columnCount()):
@@ -55,8 +56,8 @@ class PointsTable(QTableWidget):
             spin_box = self.cellWidget(self.rowCount() - 1, j)
             spin_box.setMinimum(spinbox_min)
 
-    def remove_point(self) -> None:
-        selected_rows = self.get_selected_rows()
+    def remove_point(self):
+        selected_rows = self.selected_rows
         if not selected_rows:
             QMessageBox.information(self, 'No rows', 'No rows selected', QMessageBox.Ok)
         else:
@@ -109,7 +110,7 @@ class CursorPathEditDialog(EditDialog):
         self.move_type_label = QLabel('Type:')  # Label
         self.move_type_label.setAlignment(Qt.AlignRight)
         self.move_type_comboBox = QComboBox()  # ComboBox
-        self.move_type_comboBox.addItems(['Absolute', 'Relative'])
+        self.move_type_comboBox.addItems(('Absolute', 'Relative'))
 
         self.properties_grid.addWidget(self.move_type_label, 0, 0)
         self.properties_grid.addWidget(self.move_type_comboBox, 0, 1)
@@ -126,7 +127,7 @@ class CursorPathEditDialog(EditDialog):
         self.button_label = QLabel('Button:')  # Label
         self.button_label.setAlignment(Qt.AlignRight)
         self.button_comboBox = QComboBox()  # ComboBox
-        self.button_comboBox.addItems(['None', 'Left', 'Right', 'Middle'])
+        self.button_comboBox.addItems(('None', 'Left', 'Right', 'Middle'))
 
         self.properties_grid.addWidget(self.button_label, 2, 0)
         self.properties_grid.addWidget(self.button_comboBox, 2, 1)

@@ -22,7 +22,7 @@ FILE_FILTERS = '.mcrc XML (*.mcrc);; .mcrc CSV (*.mcrc)'
 
 
 class NewActionTreeNode:
-    """Node for ActionsTreeModel class"""
+    """Node for NewActionTreeModel class"""
 
     def __init__(self, data):
         self._data = data
@@ -69,6 +69,10 @@ class NewActionTreeModel(QAbstractItemModel):
         self._root = NewActionTreeNode(None)
         for node in nodes:
             self._root.addChild(node)
+
+    @property
+    def root(self) -> NewActionTreeNode:
+        return self._root
 
     def rowCount(self, parent: QModelIndex = ...) -> int:
         if parent.isValid():
@@ -126,10 +130,6 @@ class NewActionTreeModel(QAbstractItemModel):
             return default_flags
         return Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled | default_flags
 
-    @property
-    def root(self) -> NewActionTreeNode:
-        return self._root
-
 
 class BoldDelegate(QStyledItemDelegate):
     """Custom item delegate for new_action_tree. Makes headers bold"""
@@ -152,11 +152,15 @@ def create_table_index(model: Union[QAbstractItemModel, QAbstractTableModel], ro
 
 
 class ActionsModel(QAbstractTableModel):
-    """Model for actions_table"""
+    """Model for ActionsTable"""
 
     def __init__(self, items: list):
         super().__init__()
         self._data = items
+
+    @property
+    def actions(self) -> list:
+        return self._data.copy()
 
     def columnCount(self, parent: QModelIndex = ...) -> int:
         return 2
@@ -240,12 +244,10 @@ class ActionsModel(QAbstractTableModel):
                 index_1 = create_table_index(self, next_row, 0)
                 self.dataChanged.emit(index, index_1)
 
-    @property
-    def actions(self) -> list:
-        return self._data.copy()
-
 
 class ActionsTable(QTableView):
+    """Table with drag-and-drop and move up/down functions"""
+
     addActionSignal = pyqtSignal()
     actionAddedSignal = pyqtSignal(int)
 
@@ -334,8 +336,6 @@ class ActionsTable(QTableView):
         index = create_table_index(model, row, 0)
         model.setData(index, action)
         self.actionAddedSignal.emit(row)
-        # main_window = self.parent().parent()
-        # action.open_edit_dialog(main_window)
 
     def move_up(self):
         rows = self.selected_rows
@@ -389,7 +389,7 @@ def create_actions_categories_dict() -> dict:
 
 
 def create_action_tree_items() -> list:
-    """Creates list with ActionTreeNodes for ActionsTreeModel"""
+    """Creates list with NewActionTreeNodes for NewActionTreeModel"""
     items = []
     categories = create_actions_categories_dict()
     # Use this dict to create Tree items
@@ -412,16 +412,19 @@ class MainWindow(QMainWindow):
 
         self.init_ui()
 
+        # Signals
         self.actions_table.addActionSignal.connect(self.add_new_action)
         self.new_action_tree.doubleClicked.connect(self.add_new_action)
-        self.actions_table.doubleClicked.connect(self.open_action_edit_dialog)
         self.actions_table.actionAddedSignal.connect(self.action_added)
 
-        self.delete_button.clicked.connect(self.delete)
+        self.run_button.clicked.connect(self.run)
         self.move_up_button.clicked.connect(self.actions_table.move_up)
         self.move_down_button.clicked.connect(self.actions_table.move_down)
-        self.run_button.clicked.connect(self.run)
+        self.delete_button.clicked.connect(self.delete)
         self.settings_button.clicked.connect(self.open_settings_dialog)
+
+        self.actions_table.doubleClicked.connect(self.open_action_edit_dialog)
+
         self.action_new.triggered.connect(self.new_file)
         self.action_open.triggered.connect(self.open_file)
         self.action_save.triggered.connect(self.save_file)
@@ -437,56 +440,25 @@ class MainWindow(QMainWindow):
         self._opened_file = value
         self.setWindowTitle(f'{self._opened_file}[*]')
 
+    # Qt methods
+
     def closeEvent(self, event: QCloseEvent) -> None:
         reply = self.ask_save_question()
         if reply == QMessageBox.AcceptRole:
             return_code = self.save_file()
             if return_code == 1:  # If user did not save the file
                 event.ignore()
-                return
+            else:
+                event.accept()
         elif reply == QMessageBox.DestructiveRole:
-            pass
+            event.accept()
         else:
             event.ignore()
-            return
-        event.accept()
 
-    def action_added(self, row):
-        model = self.actions_table.model()
-        index = create_table_index(model, row, 0)
-        action = model.data(index, Qt.UserRole)  # get selected action
-        action.open_edit_dialog(self)
+    # Utility methods
 
-    def run(self):
-        try:
-            runner.run(self.actions_table.model().actions.copy(), self.settings)
-        except Exception as e:
-            self.handle_exception(e)
-
-    def open_action_edit_dialog(self):
-        row = self.actions_table.selected_rows[0]
-        model = self.actions_table.model()
-        index = create_table_index(model, row, 0)
-        action = model.data(index, Qt.UserRole)  # get selected action
-        action.open_edit_dialog(self)
-
-    def add_new_action(self):
-        model = self.new_action_tree.model()
-        index = self.new_action_tree.currentIndex()
-        action_cls = model.data(index, Qt.UserRole)
-        if not isinstance(action_cls, str):
-            self.actions_table.create_action(action_cls)
-
-    def delete(self):
-        selected_rows = self.actions_table.selected_rows
-        if selected_rows:
-            for i, row in enumerate(selected_rows):
-                self.actions_table.model().removeRow(row - i)
-
-    def open_settings_dialog(self):
-        dialog = SettingsDialog(self, self.settings)
-        dialog.exec()
-        self.settings = dialog.get_settings()
+    def handle_exception(self, e):
+        self.show_error(f'An error occurred: {getattr(e, "message", repr(e))}', str(traceback.format_exc()))
 
     def ask_save_question(self) -> QMessageBox.ButtonRole:
         """
@@ -520,8 +492,50 @@ class MainWindow(QMainWindow):
 
         message_box.exec()
 
-    def handle_exception(self, e):
-        self.show_error(f'An error occurred: {getattr(e, "message", repr(e))}', str(traceback.format_exc()))
+    # New action methods
+
+    def add_new_action(self):
+        model = self.new_action_tree.model()
+        index = self.new_action_tree.currentIndex()
+        action_cls = model.data(index, Qt.UserRole)
+        if not isinstance(action_cls, str):
+            self.actions_table.create_action(action_cls)
+
+    def action_added(self, row):
+        model = self.actions_table.model()
+        index = create_table_index(model, row, 0)
+        action = model.data(index, Qt.UserRole)  # get selected action
+        action.open_edit_dialog(self)
+
+    # Buttons methods
+
+    def run(self):
+        try:
+            runner.run(self.actions_table.model().actions.copy(), self.settings)
+        except Exception as e:
+            self.handle_exception(e)
+
+    def delete(self):
+        selected_rows = self.actions_table.selected_rows
+        if selected_rows:
+            for i, row in enumerate(selected_rows):
+                self.actions_table.model().removeRow(row - i)
+
+    def open_settings_dialog(self):
+        dialog = SettingsDialog(self, self.settings)
+        dialog.exec()
+        self.settings = dialog.get_settings()
+
+    # Table methods
+
+    def open_action_edit_dialog(self):
+        row = self.actions_table.selected_rows[0]
+        model = self.actions_table.model()
+        index = create_table_index(model, row, 0)
+        action = model.data(index, Qt.UserRole)  # get selected action
+        action.open_edit_dialog(self)
+
+    # Menubar methods
 
     def new_file(self):
         file_dialog = QFileDialog(self,
@@ -610,6 +624,8 @@ class MainWindow(QMainWindow):
             runner.write_file_csv(self.opened_file, self.actions_table.model().actions.copy(), self.settings)
         else:
             raise ValueError('Unknown file format')
+
+    # UI init
 
     def init_ui(self):
         self.setWindowModified(False)

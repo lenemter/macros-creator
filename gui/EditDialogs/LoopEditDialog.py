@@ -21,11 +21,11 @@ class LoopEditDialog(EditDialog):
             loop_start = self.line_number
         return self.comment_lineEdit.text(), loop_start, self.count_spinBox.value()
 
-    def set_loop_start_comboBox_values(self) -> None:
+    def set_loop_start_comboBox_values(self):
         for i in range(1, self.row_count + 1):
             self.loop_start_comboBox.addItem(str(i))
 
-    def set_loop_start_value(self) -> None:
+    def set_loop_start_value(self):
         old_loop_start = self.action.loop_start
         if old_loop_start > self.row_count:
             self.loop_start_comboBox.setCurrentIndex(self.row_count - 1)

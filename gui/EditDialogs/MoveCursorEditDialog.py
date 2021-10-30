@@ -15,7 +15,7 @@ class MoveCursorEditDialog(EditDialog):
         self.duration_doubleSpinBox.setValue(self.action.duration)
         self.button_comboBox.setCurrentText(self.action.button)
 
-        self.move_type_comboBox.currentTextChanged.connect(self.set_spinBoxes_ranges)
+        self.move_type_comboBox.currentTextChanged.connect(self.set_position_ranges)
 
     @property
     def properties(self) -> tuple:
@@ -23,11 +23,12 @@ class MoveCursorEditDialog(EditDialog):
                 self.position_y_spinBox.value(), self.duration_doubleSpinBox.value(),
                 self.button_comboBox.currentText())
 
-    def set_spinBoxes_ranges(self) -> None:
+    def set_position_ranges(self):
+        """Set position spinbox ranges depending on move type"""
         if self.move_type_comboBox.currentText() == 'Absolute':
             self.position_x_spinBox.setRange(0, 9999)
             self.position_y_spinBox.setRange(0, 9999)
-        else:
+        elif self.move_type_comboBox.currentText() == 'Relative':
             self.position_x_spinBox.setRange(-9999, 9999)
             self.position_y_spinBox.setRange(-9999, 9999)
 
