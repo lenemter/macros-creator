@@ -48,7 +48,7 @@ class LoopEditDialog(EditDialog):
         self.count_label = QLabel('Count:')  # Label
         self.count_label.setAlignment(Qt.AlignRight)
         self.count_spinBox = QSpinBox()  # SpinBox
-        self.count_spinBox.setMinimum(1)
+        self.count_spinBox.setRange(0, 9999)
 
         self.properties_grid.addWidget(self.count_label, 1, 0)
         self.properties_grid.addWidget(self.count_spinBox, 1, 1)
