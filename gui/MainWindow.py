@@ -4,7 +4,7 @@ from typing import Optional, Any, Union
 
 from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, QSize, pyqtSignal, QDir, \
     QItemSelectionModel
-from PyQt5.QtGui import QFont, QIcon, QDropEvent, QDragMoveEvent
+from PyQt5.QtGui import QFont, QIcon, QDropEvent, QDragMoveEvent, QCloseEvent
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTreeView, QPushButton, QMenuBar, QMenu, QAction, \
     QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox, QSpacerItem
 
@@ -436,6 +436,20 @@ class MainWindow(QMainWindow):
             raise ValueError('opened_file is not a string')
         self._opened_file = value
         self.setWindowTitle(f'{self._opened_file}[*]')
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        reply = self.ask_save_question()
+        if reply == QMessageBox.AcceptRole:
+            return_code = self.save_file()
+            if return_code == 1:  # If user did not save the file
+                event.ignore()
+                return
+        elif reply == QMessageBox.DestructiveRole:
+            pass
+        else:
+            event.ignore()
+            return
+        event.accept()
 
     def action_added(self, row):
         model = self.actions_table.model()
