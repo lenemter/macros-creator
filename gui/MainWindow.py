@@ -11,7 +11,8 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTreeView, QPushB
 import runner
 from actions.Action import Action
 from gui.SettingsDialog import SettingsDialog
-from gui.icons_handler import get_icon_path, get_action_icon
+from gui.icons_handler import get_action_icon
+from utils import get_path
 
 HOME = str(Path.home())
 DEFAULT_OPENED_FILE = 'untitled.mcrc'
@@ -118,7 +119,7 @@ class NewActionTreeModel(QAbstractItemModel):
             return node.data(index.column())
         if role == Qt.DecorationRole:
             if not isinstance(node._data, str):
-                return QIcon(get_icon_path(get_action_icon(node._data)))
+                return QIcon(get_path(get_action_icon(node._data)))
         if role == Qt.UserRole:
             return node._data
         return None
@@ -337,12 +338,12 @@ class ActionsTable(QTableView):
         model.setData(index, action)
         self.actionAddedSignal.emit(row)
 
-    def move_up(self):
+    def move_items_up(self):
         rows = self.selected_rows
         self.model().move_up(rows)
         self.move_selection_up(rows)
 
-    def move_down(self):
+    def move_items_down(self):
         rows = self.selected_rows
         self.model().move_down(rows)
         self.move_selection_down(rows)
@@ -407,7 +408,6 @@ class MainWindow(QMainWindow):
         self._opened_file = None
         self.opened_file = DEFAULT_OPENED_FILE
         self.opened_file_filter = None
-        self.last_saved_actions = []
         self.settings = DEFAULT_SETTINGS
 
         self.init_ui()
@@ -418,8 +418,8 @@ class MainWindow(QMainWindow):
         self.actions_table.actionAddedSignal.connect(self.action_added)
 
         self.run_button.clicked.connect(self.run)
-        self.move_up_button.clicked.connect(self.actions_table.move_up)
-        self.move_down_button.clicked.connect(self.actions_table.move_down)
+        self.move_up_button.clicked.connect(self.actions_table.move_items_up)
+        self.move_down_button.clicked.connect(self.actions_table.move_items_down)
         self.delete_button.clicked.connect(self.delete)
         self.settings_button.clicked.connect(self.open_settings_dialog)
 
@@ -443,6 +443,7 @@ class MainWindow(QMainWindow):
     # Qt methods
 
     def closeEvent(self, event: QCloseEvent) -> None:
+        """Ask user to save his work before closing"""
         reply = self.ask_save_question()
         if reply == QMessageBox.AcceptRole:
             return_code = self.save_file()
@@ -457,24 +458,26 @@ class MainWindow(QMainWindow):
 
     # Utility methods
 
-    def handle_exception(self, e):
-        self.show_error(f'An error occurred: {getattr(e, "message", repr(e))}', str(traceback.format_exc()))
+    def handle_exception(self, exception: Exception):
+        """Handles exceptions in run() and open_file()"""
+        self.show_error(
+            f'An error occurred: {getattr(exception, "message", repr(exception))}', str(traceback.format_exc())
+        )
 
     def ask_save_question(self) -> QMessageBox.ButtonRole:
-        """
-        Asks user to save his work
-        Used in new_file() and open_file()
-        """
+        """Asks user to save his work. Used in new_file() and open_file()"""
         message_box = QMessageBox(self)
         message_box.setIcon(QMessageBox.Warning)
         message_box.setText('Do you want to save your changes?')
         message_box.setWindowTitle('Save changes')
-        close_button = QPushButton(QIcon(get_icon_path('icons/edit-delete.svg')), 'Close without saving')
+        close_button = QPushButton(QIcon(get_path('gui/icons/edit-delete.svg')), 'Close without saving')
         message_box.addButton(close_button, QMessageBox.DestructiveRole)
-        cancel_button = QPushButton(QIcon(get_icon_path('icons/dialog-cancel.svg')), 'Cancel')
+        cancel_button = QPushButton(QIcon(get_path('gui/icons/dialog-cancel.svg')), 'Cancel')
         message_box.addButton(cancel_button, QMessageBox.RejectRole)
-        save_button = QPushButton(QIcon(get_icon_path('icons/document-save.svg')), 'Save')
+        save_button = QPushButton(QIcon(get_path('gui/icons/document-save.svg')), 'Save')
         message_box.addButton(save_button, QMessageBox.AcceptRole)
+        message_box.setDefaultButton(save_button)
+
         message_box.exec()
         return message_box.buttonRole(message_box.clickedButton())
 
@@ -483,12 +486,11 @@ class MainWindow(QMainWindow):
         message_box.setWindowTitle("Error")
         message_box.setIcon(QMessageBox.Critical)
         message_box.setText(message)
-
-        ok_button = QPushButton(QIcon(get_icon_path('icons/dialog-ok-apply.svg')), 'Ok')
-        message_box.addButton(ok_button, QMessageBox.AcceptRole)
-
         if detailed_text is not None:
             message_box.setDetailedText(detailed_text)
+        ok_button = QPushButton(QIcon(get_path('gui/icons/dialog-ok-apply.svg')), 'Ok')
+        message_box.addButton(ok_button, QMessageBox.AcceptRole)
+        message_box.setDefaultButton(ok_button)
 
         message_box.exec()
 
@@ -665,25 +667,25 @@ class MainWindow(QMainWindow):
         self.right_layout.addLayout(self.buttons_layout)
         button_size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         # Run button
-        self.run_button = QPushButton(QIcon(get_icon_path('icons/system-run.svg')), 'Run')
+        self.run_button = QPushButton(QIcon(get_path('gui/icons/system-run.svg')), 'Run')
         self.run_button.setShortcut('Ctrl+Space')
         self.run_button.setToolTip('Run macro (Ctrl+Space)')
         self.run_button.setSizePolicy(button_size_policy)
         self.buttons_layout.addWidget(self.run_button)
         # Move up button
-        self.move_up_button = QPushButton(QIcon(get_icon_path('icons/go-up.svg')), 'Move up')
+        self.move_up_button = QPushButton(QIcon(get_path('gui/icons/go-up.svg')), 'Move up')
         self.move_up_button.setShortcut('Ctrl+Up')
         self.move_up_button.setToolTip('Move selected actions up (Ctrl+Up)')
         self.move_up_button.setSizePolicy(button_size_policy)
         self.buttons_layout.addWidget(self.move_up_button)
         # Move down button
-        self.move_down_button = QPushButton(QIcon(get_icon_path('icons/go-down.svg')), 'Move down')
+        self.move_down_button = QPushButton(QIcon(get_path('gui/icons/go-down.svg')), 'Move down')
         self.move_down_button.setShortcut('Ctrl+Down')
         self.move_down_button.setToolTip('Move selected actions down (Ctrl+Down)')
         self.move_down_button.setSizePolicy(button_size_policy)
         self.buttons_layout.addWidget(self.move_down_button)
         # Delete button
-        self.delete_button = QPushButton(QIcon(get_icon_path('icons/edit-delete.svg')), 'Delete')
+        self.delete_button = QPushButton(QIcon(get_path('gui/icons/edit-delete.svg')), 'Delete')
         self.delete_button.setShortcut('Del')
         self.delete_button.setToolTip('Delete selected actions (Del)')
         self.delete_button.setSizePolicy(button_size_policy)
@@ -693,7 +695,7 @@ class MainWindow(QMainWindow):
         self.buttons_layout.addItem(self.vertical_spacer)
         # Settings button
         self.settings_button = QPushButton()
-        self.settings_button.setIcon(QIcon(get_icon_path('icons/configure.svg')))
+        self.settings_button.setIcon(QIcon(get_path('gui/icons/configure.svg')))
         self.settings_button.setToolTip('Settings')
         self.settings_button.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
         self.buttons_layout.addWidget(self.settings_button)
@@ -716,11 +718,11 @@ class MainWindow(QMainWindow):
         self.menu_file = QMenu('File')
         self.menubar.addAction(self.menu_file.menuAction())
 
-        self.action_new = QAction(QIcon(get_icon_path('icons/document-new.svg')), 'New')
+        self.action_new = QAction(QIcon(get_path('gui/icons/document-new.svg')), 'New')
         self.action_new.setShortcut('Ctrl+N')
-        self.action_open = QAction(QIcon(get_icon_path('icons/document-open.svg')), 'Open')
+        self.action_open = QAction(QIcon(get_path('gui/icons/document-open.svg')), 'Open')
         self.action_open.setShortcut('Ctrl+O')
-        self.action_save = QAction(QIcon(get_icon_path('icons/document-save.svg')), 'Save')
+        self.action_save = QAction(QIcon(get_path('gui/icons/document-save.svg')), 'Save')
         self.action_save.setShortcut('Ctrl+S')
 
         self.menu_file.addAction(self.action_new)

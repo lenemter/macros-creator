@@ -45,7 +45,4 @@ class Runner(QObject):
             time_between.run()
 
         self.__current_action = None
-        self.__stop_flag = False
-        for action in self.__actions:
-            action.reset_stop()
         self.finished.emit()

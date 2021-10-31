@@ -1,12 +1,7 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy, QGridLayout, QFrame, QDoubleSpinBox
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy, QGridLayout, QDoubleSpinBox
 
-
-class HorizontalLine(QFrame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.setFrameShape(QFrame.HLine)
-        self.setFrameShadow(QFrame.Sunken)
+from gui.widgets import HorizontalLine
 
 
 class SettingsDialog(QDialog):
@@ -16,7 +11,8 @@ class SettingsDialog(QDialog):
         self.init_ui()
 
     def get_settings(self):
-        return {'time_between': self.time_between_doubleSpinBox.value()}
+        self.settings['time_between'] = self.time_between_doubleSpinBox.value()
+        return self.settings
 
     def init_ui(self):
         self.setWindowTitle('Settings')
@@ -53,6 +49,7 @@ class SettingsDialog(QDialog):
         # Time between actions
         self.time_between_label = QLabel('Time between actions:')
         self.time_between_doubleSpinBox = QDoubleSpinBox()
+        self.time_between_doubleSpinBox.setRange(0, 9999)
         self.time_between_doubleSpinBox.setValue(self.settings.get('time_between', 0.0))
         self.properties_grid.addWidget(self.time_between_label, 0, 0)
         self.properties_grid.addWidget(self.time_between_doubleSpinBox, 0, 1)

@@ -1,30 +1,15 @@
-import sys
 from collections import defaultdict
-from pathlib import Path
 
 import actions
 
-ACTION_ICONS = defaultdict(lambda: 'icons/data-error.svg', {actions.ClickAction: 'icons/input-mouse.svg',
-                                                            actions.MoveCursorAction: 'icons/transform-move.svg',
-                                                            actions.CursorPathAction: 'icons/path-mode-polyline.svg',
-                                                            actions.PressKeyAction: 'icons/input-keyboard.svg',
-                                                            actions.WriteTextAction: 'icons/edit-select-text.svg',
-                                                            actions.PauseAction: 'icons/media-playback-pause.svg',
-                                                            actions.LoopAction: 'icons/gtk-convert.svg',
-                                                            actions.GotoAction: 'icons/gtk-convert.svg'})
-
-
-def get_icon_path(path: str) -> str:
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    path = Path(path)
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = Path(sys._MEIPASS)
-        path = path.name
-    except AttributeError:
-        base_path = Path(__file__).parent.resolve()
-
-    return str(base_path / path)
+ACTION_ICONS = defaultdict(lambda: 'icons/data-error.svg', {actions.ClickAction: 'gui/icons/input-mouse.svg',
+                                                            actions.MoveCursorAction: 'gui/icons/transform-move.svg',
+                                                            actions.CursorPathAction: 'gui/icons/path-mode-polyline.svg',
+                                                            actions.PressKeyAction: 'gui/icons/input-keyboard.svg',
+                                                            actions.WriteTextAction: 'gui/icons/edit-select-text.svg',
+                                                            actions.PauseAction: 'gui/icons/media-playback-pause.svg',
+                                                            actions.LoopAction: 'gui/icons/gtk-convert.svg',
+                                                            actions.GotoAction: 'gui/icons/gtk-convert.svg'})
 
 
 def get_action_icon(action_cls) -> str:
