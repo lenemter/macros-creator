@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel, QLineEdit, QSpinBox, QComboBox, QDoubleSpinBox
 
 from gui.EditDialogs.EditDialog import EditDialog
+from gui.widgets import DescriptionLabel
 
 
 class PressKeyEditDialog(EditDialog):
@@ -44,8 +45,8 @@ class PressKeyEditDialog(EditDialog):
         self.key_label = QLabel('Key:')  # Label
         self.key_label.setAlignment(Qt.AlignRight)
         self.key_lineEdit = QLineEdit()  # LineEdit
-        self.link = QLabel('<a href="https://pyautogui.readthedocs.io/en/latest/keyboard.html#keyboard-keys"'
-                           '>Available keys</a>')
+        self.link = DescriptionLabel('<a href="https://pyautogui.readthedocs.io/en/latest/keyboard.html#keyboard-keys"'
+                                     '>Available keys</a>')
         self.link.setTextFormat(Qt.RichText)
         self.link.setTextInteractionFlags(Qt.TextBrowserInteraction)
         self.link.setOpenExternalLinks(True)

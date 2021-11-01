@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel, QTextEdit, QSpinBox, QDoubleSpinBox
 
 from gui.EditDialogs.EditDialog import EditDialog
+from gui.widgets import DescriptionLabel
 
 
 class WriteTextEditDialog(EditDialog):
@@ -26,14 +27,13 @@ class WriteTextEditDialog(EditDialog):
         self.text_label = QLabel("Text:")  # Label
         self.text_label.setAlignment(Qt.AlignRight)
         self.text_textEdit = QTextEdit()  # TextEdit
-        self.text_desctiption = QLabel('Only works with English layout. '
-                                       'If you want to write in others languages write in English '
-                                       'and change layout for executing')
-        self.text_desctiption.setWordWrap(True)
+        self.text_description = DescriptionLabel('Only works with English layout. '
+                                                 'If you want to write in others languages write in English '
+                                                 'and change layout for executing')
 
         self.properties_grid.addWidget(self.text_label, 0, 0)
         self.properties_grid.addWidget(self.text_textEdit, 0, 1)
-        self.properties_grid.addWidget(self.text_desctiption, 1, 1)
+        self.properties_grid.addWidget(self.text_description, 1, 1)
 
         # Amount
         self.amount_label = QLabel('Amount:')  # Label
