@@ -2,11 +2,12 @@ import traceback
 from pathlib import Path
 from typing import Optional, Any, Union
 
-from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, QSize, pyqtSignal, QDir, \
-    QItemSelectionModel
+from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, QSize, \
+    pyqtSignal, QDir, QItemSelectionModel
 from PyQt5.QtGui import QFont, QIcon, QDropEvent, QDragMoveEvent, QCloseEvent
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTreeView, QPushButton, QMenuBar, QMenu, QAction, \
-    QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, QFileDialog, QMessageBox, QSpacerItem
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTreeView, QPushButton, QMenuBar, \
+    QMenu, QAction, QSizePolicy, QStyledItemDelegate, QAbstractItemView, QHBoxLayout, QTableView, \
+    QFileDialog, QMessageBox, QSpacerItem
 
 import runner
 from actions.Action import Action
@@ -19,7 +20,7 @@ DEFAULT_OPENED_FILE = 'untitled.mcrc'
 DEFAULT_SETTINGS = {
     'time_between': 0.0
 }
-FILE_FILTERS = '.mcrc XML (*.mcrc);; .mcrc CSV (*.mcrc)'
+FILE_FILTERS = '.mcrc XML (*.mcrc);; .mcrc CSV (*.mcrc);; .mcrc DB (*.mcrc)'
 
 
 class NewActionTreeNode:
@@ -148,7 +149,8 @@ class BoldDelegate(QStyledItemDelegate):
         return QSize(100, 24)
 
 
-def create_table_index(model: Union[QAbstractItemModel, QAbstractTableModel], row: int, column: int) -> QModelIndex:
+def create_table_index(model: Union[QAbstractItemModel, QAbstractTableModel], row: int,
+                       column: int) -> QModelIndex:
     return QAbstractTableModel.index(model, row, column)
 
 
@@ -169,7 +171,8 @@ class ActionsModel(QAbstractTableModel):
     def rowCount(self, parent: QModelIndex = ...) -> int:
         return len(self._data)
 
-    def headerData(self, section: int, orientation: Qt.Orientation, role: int = ...) -> Union[int, str]:
+    def headerData(self, section: int, orientation: Qt.Orientation, role: int = ...) -> Union[
+        int, str]:
         if role == Qt.DisplayRole:
             if orientation == Qt.PortraitOrientation:
                 return ['Action', 'Comment'][section]
@@ -297,7 +300,8 @@ class ActionsTable(QTableView):
 
             if rows[0] == target_row:
                 return None
-            if rows[-1] - rows[0] == len(rows) and target_row == -1:  # if rows in the end and go in a row
+            if rows[-1] - rows[0] == len(
+                    rows) and target_row == -1:  # if rows in the end and go in a row
                 return None
             if target_row == -1:
                 target_row = model.rowCount()
@@ -436,7 +440,7 @@ class MainWindow(QMainWindow):
     @opened_file.setter
     def opened_file(self, value):
         if not isinstance(value, str):
-            raise ValueError('opened_file is not a string')
+            raise ValueError('Opened file is not a string')
         self._opened_file = value
         self.setWindowTitle(f'{self._opened_file}[*]')
 
@@ -461,7 +465,8 @@ class MainWindow(QMainWindow):
     def handle_exception(self, exception: Exception):
         """Handles exceptions in run() and open_file()"""
         self.show_error(
-            f'An error occurred: {getattr(exception, "message", repr(exception))}', str(traceback.format_exc())
+            f'An error occurred: {getattr(exception, "message", repr(exception))}',
+            str(traceback.format_exc())
         )
 
     def ask_save_question(self) -> QMessageBox.ButtonRole:
@@ -470,11 +475,14 @@ class MainWindow(QMainWindow):
         message_box.setIcon(QMessageBox.Warning)
         message_box.setText('Do you want to save your changes?')
         message_box.setWindowTitle('Save changes')
-        close_button = QPushButton(QIcon(get_path('gui/icons/edit-delete.svg')), 'Close without saving')
+        close_button = QPushButton(QIcon(get_path('gui/icons/edit-delete.svg')),
+                                   'Close without saving')
         message_box.addButton(close_button, QMessageBox.DestructiveRole)
-        cancel_button = QPushButton(QIcon(get_path('gui/icons/dialog-cancel.svg')), 'Cancel')
+        cancel_button = QPushButton(QIcon(get_path('gui/icons/dialog-cancel.svg')),
+                                    'Cancel')
         message_box.addButton(cancel_button, QMessageBox.RejectRole)
-        save_button = QPushButton(QIcon(get_path('gui/icons/document-save.svg')), 'Save')
+        save_button = QPushButton(QIcon(get_path('gui/icons/document-save.svg')),
+                                  'Save')
         message_box.addButton(save_button, QMessageBox.AcceptRole)
         message_box.setDefaultButton(save_button)
 
@@ -488,7 +496,8 @@ class MainWindow(QMainWindow):
         message_box.setText(message)
         if detailed_text is not None:
             message_box.setDetailedText(detailed_text)
-        ok_button = QPushButton(QIcon(get_path('gui/icons/dialog-ok-apply.svg')), 'Ok')
+        ok_button = QPushButton(QIcon(get_path('gui/icons/dialog-ok-apply.svg')),
+                                'Ok')
         message_box.addButton(ok_button, QMessageBox.AcceptRole)
         message_box.setDefaultButton(ok_button)
 
@@ -513,7 +522,7 @@ class MainWindow(QMainWindow):
 
     def run(self):
         try:
-            runner.run(self.actions_table.model().actions.copy(), self.settings)
+            runner.run(self.actions_table.model().actions, self.settings)
         except Exception as e:
             self.handle_exception(e)
 
@@ -598,6 +607,12 @@ class MainWindow(QMainWindow):
                 except Exception as e:
                     self.handle_exception(e)
                     return
+            elif self.opened_file_filter == '.mcrc DB (*.mcrc)':
+                try:
+                    actions, self.settings = runner.read_file_db(self.opened_file)
+                except Exception as e:
+                    self.handle_exception(e)
+                    return
             else:
                 raise ValueError('Unknown file format')
 
@@ -621,9 +636,17 @@ class MainWindow(QMainWindow):
                 return 1
 
         if self.opened_file_filter == '.mcrc XML (*.mcrc)':
-            runner.write_file_xml(self.opened_file, self.actions_table.model().actions.copy(), self.settings)
+            runner.write_file_xml(self.opened_file,
+                                  self.actions_table.model().actions,
+                                  self.settings)
         elif self.opened_file_filter == '.mcrc CSV (*.mcrc)':
-            runner.write_file_csv(self.opened_file, self.actions_table.model().actions.copy(), self.settings)
+            runner.write_file_csv(self.opened_file,
+                                  self.actions_table.model().actions,
+                                  self.settings)
+        elif self.opened_file_filter == '.mcrc DB (*.mcrc)':
+            runner.write_file_db(self.opened_file,
+                                 self.actions_table.model().actions,
+                                 self.settings)
         else:
             raise ValueError('Unknown file format')
 
@@ -667,25 +690,29 @@ class MainWindow(QMainWindow):
         self.right_layout.addLayout(self.buttons_layout)
         button_size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         # Run button
-        self.run_button = QPushButton(QIcon(get_path('gui/icons/system-run.svg')), 'Run')
+        self.run_button = QPushButton(QIcon(get_path('gui/icons/system-run.svg')),
+                                      'Run')
         self.run_button.setShortcut('Ctrl+Space')
         self.run_button.setToolTip('Run macro (Ctrl+Space)')
         self.run_button.setSizePolicy(button_size_policy)
         self.buttons_layout.addWidget(self.run_button)
         # Move up button
-        self.move_up_button = QPushButton(QIcon(get_path('gui/icons/go-up.svg')), 'Move up')
+        self.move_up_button = QPushButton(QIcon(get_path('gui/icons/go-up.svg')),
+                                          'Move up')
         self.move_up_button.setShortcut('Ctrl+Up')
         self.move_up_button.setToolTip('Move selected actions up (Ctrl+Up)')
         self.move_up_button.setSizePolicy(button_size_policy)
         self.buttons_layout.addWidget(self.move_up_button)
         # Move down button
-        self.move_down_button = QPushButton(QIcon(get_path('gui/icons/go-down.svg')), 'Move down')
+        self.move_down_button = QPushButton(QIcon(get_path('gui/icons/go-down.svg')),
+                                            'Move down')
         self.move_down_button.setShortcut('Ctrl+Down')
         self.move_down_button.setToolTip('Move selected actions down (Ctrl+Down)')
         self.move_down_button.setSizePolicy(button_size_policy)
         self.buttons_layout.addWidget(self.move_down_button)
         # Delete button
-        self.delete_button = QPushButton(QIcon(get_path('gui/icons/edit-delete.svg')), 'Delete')
+        self.delete_button = QPushButton(QIcon(get_path('gui/icons/edit-delete.svg')),
+                                         'Delete')
         self.delete_button.setShortcut('Del')
         self.delete_button.setToolTip('Delete selected actions (Del)')
         self.delete_button.setSizePolicy(button_size_policy)

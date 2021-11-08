@@ -27,8 +27,9 @@ class ClickEditDialog(EditDialog):
 
     @property
     def properties(self) -> tuple:
-        return (self.comment_lineEdit.text(), self.action_comboBox.currentText(), self.button_comboBox.currentText(),
-                self.amount_spinBox.value(), self.interval_doubleSpinBox.value(), self.move_type_comboBox.currentText(),
+        return (self.comment_lineEdit.text(), self.action_comboBox.currentText(),
+                self.button_comboBox.currentText(), self.amount_spinBox.value(),
+                self.interval_doubleSpinBox.value(), self.move_type_comboBox.currentText(),
                 self.position_x_spinBox.value(), self.position_y_spinBox.value(),
                 int(self.restore_checkBox.isChecked()))
 
@@ -51,7 +52,7 @@ class ClickEditDialog(EditDialog):
 
     def check_interval(self):
         """Disable interval spinbox if amount == 1 or disabled"""
-        if any((self.amount_spinBox.value() == 1, not self.amount_spinBox.isEnabled())):  # if amount == 1 or disabled
+        if any((self.amount_spinBox.value() == 1, not self.amount_spinBox.isEnabled())):
             self.interval_doubleSpinBox.setDisabled(True)
         else:
             self.interval_doubleSpinBox.setDisabled(False)

@@ -19,9 +19,9 @@ class MoveCursorEditDialog(EditDialog):
 
     @property
     def properties(self) -> tuple:
-        return (self.comment_lineEdit.text(), self.move_type_comboBox.currentText(), self.position_x_spinBox.value(),
-                self.position_y_spinBox.value(), self.duration_doubleSpinBox.value(),
-                self.button_comboBox.currentText())
+        return (self.comment_lineEdit.text(), self.move_type_comboBox.currentText(),
+                self.position_x_spinBox.value(), self.position_y_spinBox.value(),
+                self.duration_doubleSpinBox.value(), self.button_comboBox.currentText())
 
     def set_position_ranges(self):
         """Set position spinbox ranges depending on move type"""

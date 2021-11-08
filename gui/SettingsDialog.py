@@ -1,5 +1,6 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy, QGridLayout, QDoubleSpinBox
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy, QGridLayout, \
+    QDoubleSpinBox
 
 from gui.widgets import HorizontalLine
 

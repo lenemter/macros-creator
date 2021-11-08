@@ -2,8 +2,8 @@
 
 Simple application for creating macros
 
-![img.png](img.png)
-![img_2.png](img_2.png)
+![img.png](img.png)  
+![img_2.png](img_2.png)  
 ![img_3.png](img_3.png)
 
 Build app with PyInstaller:

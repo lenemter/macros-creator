@@ -20,8 +20,9 @@ class PressKeyEditDialog(EditDialog):
 
     @property
     def properties(self) -> tuple:
-        return (self.comment_lineEdit.text(), self.key_lineEdit.text(), self.action_comboBox.currentText(),
-                self.amount_spinBox.value(), self.interval_doubleSpinBox.value())
+        return (
+        self.comment_lineEdit.text(), self.key_lineEdit.text(), self.action_comboBox.currentText(),
+        self.amount_spinBox.value(), self.interval_doubleSpinBox.value())
 
     def check_action(self):
         """Disable amount spinbox if action is not 'Press and release'"""
@@ -33,7 +34,7 @@ class PressKeyEditDialog(EditDialog):
 
     def check_interval(self):
         """Disable interval spinbox if amount == 1 or disabled"""
-        if any((self.amount_spinBox.value() == 1, not self.amount_spinBox.isEnabled())):  # if amount == 1 or disabled
+        if any((self.amount_spinBox.value() == 1, not self.amount_spinBox.isEnabled())):
             self.interval_doubleSpinBox.setDisabled(True)
         else:
             self.interval_doubleSpinBox.setDisabled(False)
@@ -45,8 +46,9 @@ class PressKeyEditDialog(EditDialog):
         self.key_label = QLabel('Key:')  # Label
         self.key_label.setAlignment(Qt.AlignRight)
         self.key_lineEdit = QLineEdit()  # LineEdit
-        self.link = DescriptionLabel('<a href="https://pyautogui.readthedocs.io/en/latest/keyboard.html#keyboard-keys"'
-                                     '>Available keys</a>')
+        self.link = DescriptionLabel(
+            '<a href="https://pyautogui.readthedocs.io/en/latest/keyboard.html#keyboard-keys"'
+            '>Available keys</a>')
         self.link.setTextFormat(Qt.RichText)
         self.link.setTextInteractionFlags(Qt.TextBrowserInteraction)
         self.link.setOpenExternalLinks(True)

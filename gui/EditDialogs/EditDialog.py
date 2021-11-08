@@ -1,7 +1,7 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QDialogButtonBox, QSpacerItem, \
-    QSizePolicy, QGridLayout, QPushButton
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QDialogButtonBox, \
+    QSpacerItem, QSizePolicy, QGridLayout, QPushButton
 
 from utils import get_path
 from gui.widgets import HorizontalLine
@@ -87,8 +87,10 @@ class EditDialog(QDialog):
         self.layout.addWidget(self.buttons_line)
 
         self.button_box = QDialogButtonBox()
-        self.ok_button = QPushButton(QIcon(get_path('gui/icons/dialog-ok-apply.svg')), 'Ok')
+        self.ok_button = QPushButton(QIcon(get_path('gui/icons/dialog-ok-apply.svg')),
+                                     'Ok')
         self.button_box.addButton(self.ok_button, QDialogButtonBox.AcceptRole)
-        self.cancel_button = QPushButton(QIcon(get_path('gui/icons/dialog-cancel.svg')), 'Cancel')
+        self.cancel_button = QPushButton(QIcon(get_path('gui/icons/dialog-cancel.svg')),
+                                         'Cancel')
         self.button_box.addButton(self.cancel_button, QDialogButtonBox.RejectRole)
         self.layout.addWidget(self.button_box)

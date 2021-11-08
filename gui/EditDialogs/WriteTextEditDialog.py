@@ -15,8 +15,8 @@ class WriteTextEditDialog(EditDialog):
 
     @property
     def properties(self) -> tuple:
-        return (self.comment_lineEdit.text(), self.text_textEdit.toPlainText(), self.amount_spinBox.value(),
-                self.interval_doubleSpinBox.value())
+        return (self.comment_lineEdit.text(), self.text_textEdit.toPlainText(),
+                self.amount_spinBox.value(), self.interval_doubleSpinBox.value())
 
     def init_ui(self):
         super().init_ui()
@@ -28,8 +28,8 @@ class WriteTextEditDialog(EditDialog):
         self.text_label.setAlignment(Qt.AlignRight)
         self.text_textEdit = QTextEdit()  # TextEdit
         self.text_description = DescriptionLabel('Only works with English layout. '
-                                                 'If you want to write in others languages write in English '
-                                                 'and change layout for executing')
+                                                 'If you want to write in others languages '
+                                                 'write in English and change layout for executing')
 
         self.properties_grid.addWidget(self.text_label, 0, 0)
         self.properties_grid.addWidget(self.text_textEdit, 0, 1)

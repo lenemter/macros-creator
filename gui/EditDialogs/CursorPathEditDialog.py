@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QLabel, QComboBox, QHBoxLayout, QPushButton, QTableWidget, QSpinBox, QHeaderView, \
-    QAbstractItemView, QMessageBox, QDoubleSpinBox
+from PyQt5.QtWidgets import QLabel, QComboBox, QHBoxLayout, QPushButton, QTableWidget, QSpinBox, \
+    QHeaderView, QAbstractItemView, QMessageBox, QDoubleSpinBox
 
 from gui.EditDialogs.EditDialog import EditDialog
 
@@ -97,7 +97,8 @@ class CursorPathEditDialog(EditDialog):
     @property
     def properties(self) -> tuple:
         return (self.comment_lineEdit.text(), self.move_type_comboBox.currentText(),
-                self.duration_doubleSpinBox.value(), self.button_comboBox.currentText(), self.table.get_points_list())
+                self.duration_doubleSpinBox.value(), self.button_comboBox.currentText(),
+                self.table.get_points_list())
 
     def set_table_state(self) -> None:
         self.table.range_state = self.move_type_comboBox.currentText()

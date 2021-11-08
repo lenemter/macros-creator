@@ -9,7 +9,7 @@ class LoopEditDialog(EditDialog):
         super().__init__(parent, action)
         self.row_count = self.parent().actions_table.model().rowCount()
 
-        self.set_loop_start_comboBox_values()
+        self.set_loop_start_combobox_values()
         self.set_loop_start_value()
         self.count_spinBox.setValue(self.action.count)
 
@@ -21,7 +21,7 @@ class LoopEditDialog(EditDialog):
             loop_start = self.line_number
         return self.comment_lineEdit.text(), loop_start, self.count_spinBox.value()
 
-    def set_loop_start_comboBox_values(self):
+    def set_loop_start_combobox_values(self):
         for i in range(1, self.row_count + 1):
             self.loop_start_comboBox.addItem(str(i))
 
