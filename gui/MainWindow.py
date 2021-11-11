@@ -429,9 +429,11 @@ class MainWindow(QMainWindow):
 
         self.actions_table.doubleClicked.connect(self.open_action_edit_dialog)
 
-        self.action_new.triggered.connect(self.new_file)
-        self.action_open.triggered.connect(self.open_file)
-        self.action_save.triggered.connect(self.save_file)
+        self.action_new.triggered.connect(self.file_new)
+        self.action_open.triggered.connect(self.file_open)
+        self.action_save.triggered.connect(self.file_save)
+        self.action_save_as.triggered.connect(self.file_save_as)
+        self.action_close.triggered.connect(self.file_close)
 
     @property
     def opened_file(self):
@@ -444,13 +446,19 @@ class MainWindow(QMainWindow):
         self._opened_file = value
         self.setWindowTitle(f'{self._opened_file}[*]')
 
+        if hasattr(self, 'action_save'):
+            if value == DEFAULT_OPENED_FILE:
+                self.action_save.setText('Save...')
+            else:
+                self.action_save.setText('Save')
+
     # Qt methods
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """Ask user to save his work before closing"""
         reply = self.ask_save_question()
         if reply == QMessageBox.AcceptRole:
-            return_code = self.save_file()
+            return_code = self.file_save()
             if return_code == 1:  # If user did not save the file
                 event.ignore()
             else:
@@ -482,7 +490,7 @@ class MainWindow(QMainWindow):
                                     'Cancel')
         message_box.addButton(cancel_button, QMessageBox.RejectRole)
         save_button = QPushButton(QIcon(get_path('gui/icons/document-save.svg')),
-                                  'Save')
+                                  'Save' if self.opened_file != DEFAULT_OPENED_FILE else 'Save...')
         message_box.addButton(save_button, QMessageBox.AcceptRole)
         message_box.setDefaultButton(save_button)
 
@@ -548,7 +556,7 @@ class MainWindow(QMainWindow):
 
     # Menubar methods
 
-    def new_file(self):
+    def file_new(self):
         file_dialog = QFileDialog(self,
                                   'Create new file',
                                   HOME,
@@ -559,7 +567,7 @@ class MainWindow(QMainWindow):
         if file_dialog.exec() == QFileDialog.Accepted:
             reply = self.ask_save_question()
             if reply == QMessageBox.Accepted:
-                return_code = self.save_file()
+                return_code = self.file_save()
                 if return_code == 1:  # If user did not save the file
                     return
             elif reply == QMessageBox.NoButton:
@@ -573,7 +581,7 @@ class MainWindow(QMainWindow):
                 pass
             self.actions_table.setModel(ActionsModel([]))
 
-    def open_file(self):
+    def file_open(self):
         file_dialog = QFileDialog(self,
                                   'Open file',
                                   HOME,
@@ -584,7 +592,7 @@ class MainWindow(QMainWindow):
         if file_dialog.exec() == QFileDialog.Accepted:
             reply = self.ask_save_question()
             if reply == QMessageBox.AcceptRole:
-                return_code = self.save_file()
+                return_code = self.file_save()
                 if return_code == 1:  # If user did not save the file
                     return
             elif reply == QMessageBox.DestructiveRole:
@@ -618,8 +626,9 @@ class MainWindow(QMainWindow):
 
             self.actions_table.setModel(ActionsModel(actions))
 
-    def save_file(self) -> Optional[int]:
-        if self.opened_file == DEFAULT_OPENED_FILE:
+    def file_save(self, always_open_dialog: bool = False) -> Optional[int]:
+        """always_open_dialog is only used in self.file_save_as()"""
+        if self.opened_file == DEFAULT_OPENED_FILE or always_open_dialog:
             file_dialog = QFileDialog(self,
                                       'Create new file',
                                       HOME,
@@ -649,6 +658,26 @@ class MainWindow(QMainWindow):
                                  self.settings)
         else:
             raise ValueError('Unknown file format')
+
+    def file_save_as(self):
+        old_file = self.opened_file
+        return_code = self.file_save(always_open_dialog=True)
+        if return_code == 1:
+            self.opened_file = old_file
+
+    def file_close(self):
+        reply = self.ask_save_question()
+        if reply == QMessageBox.AcceptRole:
+            return_code = self.file_save()
+            if return_code == 1:
+                return
+        elif reply == QMessageBox.RejectRole:
+            return
+        elif reply == QMessageBox.DestructiveRole:
+            pass
+
+        self.opened_file = DEFAULT_OPENED_FILE
+        self.actions_table.setModel(ActionsModel([]))  # Clear data
 
     # UI init
 
@@ -745,13 +774,18 @@ class MainWindow(QMainWindow):
         self.menu_file = QMenu('File')
         self.menubar.addAction(self.menu_file.menuAction())
 
-        self.action_new = QAction(QIcon(get_path('gui/icons/document-new.svg')), 'New')
+        self.action_new = QAction(QIcon(get_path('gui/icons/document-new.svg')), 'New...')
         self.action_new.setShortcut('Ctrl+N')
-        self.action_open = QAction(QIcon(get_path('gui/icons/document-open.svg')), 'Open')
+        self.action_open = QAction(QIcon(get_path('gui/icons/document-open.svg')), 'Open...')
         self.action_open.setShortcut('Ctrl+O')
-        self.action_save = QAction(QIcon(get_path('gui/icons/document-save.svg')), 'Save')
+        self.action_save = QAction(QIcon(get_path('gui/icons/document-save.svg')), 'Save...')
         self.action_save.setShortcut('Ctrl+S')
+        self.action_save_as = QAction(QIcon(get_path('gui/icons/document-save.svg')), 'Save as...')
+        self.action_save_as.setShortcut('Ctrl+Shift+S')
+        self.action_close = QAction(QIcon(get_path('gui/icons/dialog-cancel.svg')), 'Close file')
 
         self.menu_file.addAction(self.action_new)
         self.menu_file.addAction(self.action_open)
         self.menu_file.addAction(self.action_save)
+        self.menu_file.addAction(self.action_save_as)
+        self.menu_file.addAction(self.action_close)
