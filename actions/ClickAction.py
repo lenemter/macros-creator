@@ -22,6 +22,7 @@ class ClickAction(mixins.PyautoguiStopMixin, Action):
         self.restore_cursor = int(restore_cursor)  # 0 - False, 1 - True
 
         self.__stop_flag = False
+        self.__pause_action = None
 
     @property
     def parameters(self) -> dict:
@@ -72,7 +73,7 @@ class ClickAction(mixins.PyautoguiStopMixin, Action):
         # and 'Other' category is becoming the first one
         from .PauseAction import PauseAction
 
-        pause_action = PauseAction(duration=self.interval)
+        self.__pause_action = PauseAction(duration=self.interval)
         for _ in range(self.amount):
             if self.__stop_flag:
                 return None
@@ -92,4 +93,4 @@ class ClickAction(mixins.PyautoguiStopMixin, Action):
             if self.restore_cursor:
                 pyautogui.moveTo(*mouse_position)
 
-            pause_action.run()
+            self.__pause_action.run()

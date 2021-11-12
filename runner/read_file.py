@@ -54,3 +54,40 @@ def read_file_csv(filepath) -> tuple:
             actions.append(action_cls(**parameters))
 
     return actions, settings
+
+
+def read_file_db(filepath) -> tuple:
+    from io import StringIO
+    import csv
+    import sqlite3
+    from .utils import NAME_CLASS_DICT, DELIMITER, QUOTECHAR, QUOTE_METHOD
+
+    connection = sqlite3.connect(filepath)
+    cursor = connection.cursor()
+    settings = cursor.execute('SELECT settings FROM settings').fetchall()
+    actions = cursor.execute('SELECT action FROM macro').fetchall()
+    connection.close()
+
+    settings = settings[0][0]
+    actions = '\n'.join([x[0] for x in actions])
+    data = StringIO(settings + '\n' + actions)
+    print(f'{data.getvalue()=}')
+    reader = csv.reader(data, delimiter=DELIMITER, quotechar=QUOTECHAR, quoting=QUOTE_METHOD)
+    actions = []
+    for row in reader:
+        settings = row[1:]
+        break
+    settings = [parameter.split('=') for parameter in settings]
+    settings = {parameter: value for (parameter, value) in settings}
+    settings = convert_settings(settings)
+
+    for row in reader:
+        name, *parameters = row
+        name = convert_name(name)
+        parameters = [parameter.split('=') for parameter in parameters]
+        parameters = {parameter: value for (parameter, value) in parameters}
+
+        action_cls = NAME_CLASS_DICT[name]
+        actions.append(action_cls(**parameters))
+
+    return actions, settings

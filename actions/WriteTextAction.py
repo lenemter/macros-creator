@@ -15,6 +15,7 @@ class WriteTextAction(Action):
         self.interval = float(interval)
 
         self.__stop_flag = False
+        self.__pause_action = None
 
     @property
     def parameters(self) -> dict:
@@ -35,17 +36,19 @@ class WriteTextAction(Action):
         # and 'Other' category is becoming the first one
         from .PauseAction import PauseAction
 
-        pause_action = PauseAction(duration=self.interval)
+        self.__pause_action = PauseAction(duration=self.interval)
         full_text = self.text * self.amount
         # can't stop using FailSafeException
         for char in full_text:
             if self.__stop_flag:
                 break
-            pause_action.run()
+            self.__pause_action.run()
             pyautogui.typewrite(char)
 
     def stop(self):
         self.__stop_flag = True
+        self.__pause_action.stop()
 
     def reset_stop(self):
         self.__stop_flag = False
+        self.__pause_action.reset_stop()

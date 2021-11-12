@@ -645,17 +645,26 @@ class MainWindow(QMainWindow):
                 return 1
 
         if self.opened_file_filter == '.mcrc XML (*.mcrc)':
-            runner.write_file_xml(self.opened_file,
-                                  self.actions_table.model().actions,
-                                  self.settings)
+            try:
+                runner.write_file_xml(self.opened_file,
+                                      self.actions_table.model().actions,
+                                      self.settings)
+            except Exception as e:
+                self.handle_exception(e)
         elif self.opened_file_filter == '.mcrc CSV (*.mcrc)':
-            runner.write_file_csv(self.opened_file,
-                                  self.actions_table.model().actions,
-                                  self.settings)
+            try:
+                runner.write_file_csv(self.opened_file,
+                                      self.actions_table.model().actions,
+                                      self.settings)
+            except Exception as e:
+                self.handle_exception(e)
         elif self.opened_file_filter == '.mcrc DB (*.mcrc)':
-            runner.write_file_db(self.opened_file,
-                                 self.actions_table.model().actions,
-                                 self.settings)
+            try:
+                runner.write_file_db(self.opened_file,
+                                     self.actions_table.model().actions,
+                                     self.settings)
+            except Exception as e:
+                self.handle_exception(e)
         else:
             raise ValueError('Unknown file format')
 
