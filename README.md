@@ -2,17 +2,26 @@
 
 Simple application for creating macros
 
+#### Features:
+
+* Click
+* Move cursor
+* Press Key
+* Write Text
+* Pause
+* Loops
+
 ![img.png](img.png)  
-![img_2.png](img_2.png)  
-![img_3.png](img_3.png)
+![img_1.png](img_1.png)
+![img_2.png](img_2.png)
 
-Build app with PyInstaller:
+### Build app with PyInstaller:
 
-### Linux / MacOS
+#### Linux / MacOS
 
 `pyinstaller --onefile -w --add-data "gui/icons/.:." main.py`
 
-### Windows
+#### Windows
 
 `pyinstaller --onefile -w --add-data "gui/icons/.;." main.py`
 
