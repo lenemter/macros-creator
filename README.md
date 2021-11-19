@@ -1,6 +1,6 @@
 # Macros Creator
 
-Simple application for creating macros
+Simple application for creating macros for mouse and keyboard
 
 #### Features:
 
@@ -10,6 +10,7 @@ Simple application for creating macros
 * Write Text
 * Pause
 * Loops
+* Absolute / Relative mouse positioning
 
 ![img.png](img.png)  
 ![img_1.png](img_1.png)

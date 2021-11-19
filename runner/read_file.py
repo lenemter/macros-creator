@@ -71,7 +71,6 @@ def read_file_db(filepath) -> tuple:
     settings = settings[0][0]
     actions = '\n'.join([x[0] for x in actions])
     data = StringIO(settings + '\n' + actions)
-    print(f'{data.getvalue()=}')
     reader = csv.reader(data, delimiter=DELIMITER, quotechar=QUOTECHAR, quoting=QUOTE_METHOD)
     actions = []
     for row in reader:
