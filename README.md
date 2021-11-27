@@ -2,7 +2,7 @@
 
 Simple application for creating macros for mouse and keyboard
 
-#### Features:
+### Features:
 
 * Click
 * Move cursor
