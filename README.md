@@ -12,6 +12,13 @@ Simple application for creating macros for mouse and keyboard
 * Loops
 * Absolute / Relative mouse positioning
 
+### OS Support:
+
+* Windows
+* Linux (X11)
+* MacOS **_should work_** (not tested)
+* Linux (Wayland) **does not work**
+
 ![img.png](img.png)  
 ![img_1.png](img_1.png)
 ![img_2.png](img_2.png)
