@@ -20,7 +20,7 @@ Simple application for creating macros for mouse and keyboard
 
 #### Linux / MacOS
 
-`pyinstaller --onefile --name macros_creator -w --add-data "gui/icons/.:." main.py`
+`pyinstaller --onefile --name macros_creator --noconsole --add-data "gui/icons/.:." main.py`
 
 #### Windows
 
