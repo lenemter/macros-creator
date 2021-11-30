@@ -44,7 +44,7 @@ Icons: [Breeze icon theme](https://github.com/KDE/breeze-icons)
 3. Amount. Clicks amount (Available when chosen Click in Action)
 4. Interval. Interval between clicks (Available when chosen Click in Action and Amount > 1)
 5. Move type. How to move mouse cursor
-    1. Absolute. absolute screen position (0; 0) is the left top corner
+    1. Absolute. absolute screen position. (0; 0) is the left top corner
     2. Relative. Relative to previous mouse position
 6. Position X
 7. Position Y
@@ -53,7 +53,7 @@ Icons: [Breeze icon theme](https://github.com/KDE/breeze-icons)
 ### Move cursor
 
 1. Move type. How to move mouse cursor
-    1. Absolute. absolute screen position (0; 0) is the left top corner
+    1. Absolute. absolute screen position. (0; 0) is the left top corner
     2. Relative. Relative to previous mouse position
 2. Position X
 3. Position Y
@@ -82,8 +82,8 @@ Icons: [Breeze icon theme](https://github.com/KDE/breeze-icons)
 
 1. Text. What to write (English only. If you want to write in others languages write in English and
    change layout for executing)
-2. Amount
-3. Interval
+2. Amount. How many times to repeat the text
+3. Interval. Interval between every key press
 
 ### Pause
 
