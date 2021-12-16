@@ -46,7 +46,7 @@ class Runner(QObject):
                 break
             next_line = i + 1 if next_line is None else next_line - 1  # get next index
             i = next_line
-            self.__time_between.run()
+            # self.__time_between.run()
 
         self.__current_action = None
         self.__time_between = None

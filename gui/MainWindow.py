@@ -425,7 +425,7 @@ class MainWindow(QMainWindow):
         self.move_up_button.clicked.connect(self.actions_table.move_items_up)
         self.move_down_button.clicked.connect(self.actions_table.move_items_down)
         self.delete_button.clicked.connect(self.delete)
-        self.settings_button.clicked.connect(self.open_settings_dialog)
+        # self.settings_button.clicked.connect(self.open_settings_dialog)
 
         self.actions_table.doubleClicked.connect(self.open_action_edit_dialog)
 
@@ -727,11 +727,11 @@ class MainWindow(QMainWindow):
         self.vertical_spacer = QSpacerItem(100, 1, QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.buttons_layout.addItem(self.vertical_spacer)
         # Settings button
-        self.settings_button = QPushButton()
-        self.settings_button.setIcon(QIcon(get_path('gui/icons/configure.svg')))
-        self.settings_button.setToolTip('Settings')
-        self.settings_button.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
-        self.buttons_layout.addWidget(self.settings_button)
+        # self.settings_button = QPushButton()
+        # self.settings_button.setIcon(QIcon(get_path('gui/icons/configure.svg')))
+        # self.settings_button.setToolTip('Settings')
+        # self.settings_button.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
+        # self.buttons_layout.addWidget(self.settings_button)
 
         # Actions table
         self.actions_table = ActionsTable()
