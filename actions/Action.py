@@ -12,6 +12,7 @@ class Action(ABC):
 
     @property
     def xml_name(self) -> str:
+        # e.g Write text -> write_text
         return self.name.lower().replace(' ', '_')
 
     @property
@@ -20,7 +21,7 @@ class Action(ABC):
 
     @abstractmethod
     def open_edit_dialog(self, parent):
-        raise NotImplementedError
+        pass
 
     def xml(self) -> ElementTree.Element:
         xml_name = self.xml_name
@@ -29,12 +30,12 @@ class Action(ABC):
 
     @abstractmethod
     def run(self):
-        raise NotImplementedError
+        pass
 
     @abstractmethod
     def stop(self):
-        raise NotImplementedError
+        pass
 
     @abstractmethod
     def reset_stop(self):
-        raise NotImplementedError
+        pass

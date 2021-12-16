@@ -1,6 +1,6 @@
 import traceback
 from pathlib import Path
-from typing import Optional, Any, Union
+from typing import Any
 
 from PyQt5.QtCore import Qt, QModelIndex, QAbstractItemModel, QAbstractTableModel, QRect, QSize, \
     pyqtSignal, QDir, QItemSelectionModel
@@ -20,7 +20,7 @@ DEFAULT_OPENED_FILE = 'untitled.mcrc'
 DEFAULT_SETTINGS = {
     'time_between': 0.0
 }
-FILE_FILTERS = '.mcrc XML (*.mcrc);; .mcrc CSV (*.mcrc);; .mcrc DB (*.mcrc)'
+FILE_FILTERS = '.mcrc XML (*.mcrc)'
 
 
 class NewActionTreeNode:
@@ -32,7 +32,7 @@ class NewActionTreeNode:
         self._parent = None
         self._row = 0
 
-    def data(self, column) -> Optional[str]:
+    def data(self, column) -> None | str:
         if column == 0:
             if self._data is None:
                 return None
@@ -145,11 +145,12 @@ class BoldDelegate(QStyledItemDelegate):
             option.font.setWeight(QFont.Bold)
         QStyledItemDelegate.paint(self, painter, option, index)
 
+    # Increases items' size in tree
     def sizeHint(self, option, index: QModelIndex) -> QSize:
         return QSize(100, 24)
 
 
-def create_table_index(model: Union[QAbstractItemModel, QAbstractTableModel], row: int,
+def create_table_index(model: QAbstractItemModel | QAbstractTableModel, row: int,
                        column: int) -> QModelIndex:
     return QAbstractTableModel.index(model, row, column)
 
@@ -171,8 +172,7 @@ class ActionsModel(QAbstractTableModel):
     def rowCount(self, parent: QModelIndex = ...) -> int:
         return len(self._data)
 
-    def headerData(self, section: int, orientation: Qt.Orientation, role: int = ...) -> Union[
-        int, str]:
+    def headerData(self, section: int, orientation: Qt.Orientation, role: int = ...) -> int | str:
         if role == Qt.DisplayRole:
             if orientation == Qt.PortraitOrientation:
                 return ['Action', 'Comment'][section]
@@ -603,30 +603,15 @@ class MainWindow(QMainWindow):
             self.opened_file = file_dialog.selectedFiles()[0]
             self.opened_file_filter = file_dialog.selectedNameFilter()
 
-            if self.opened_file_filter == '.mcrc XML (*.mcrc)':
-                try:
-                    actions, self.settings = runner.read_file_xml(self.opened_file)
-                except Exception as e:
-                    self.handle_exception(e)
-                    return
-            elif self.opened_file_filter == '.mcrc CSV (*.mcrc)':
-                try:
-                    actions, self.settings = runner.read_file_csv(self.opened_file)
-                except Exception as e:
-                    self.handle_exception(e)
-                    return
-            elif self.opened_file_filter == '.mcrc DB (*.mcrc)':
-                try:
-                    actions, self.settings = runner.read_file_db(self.opened_file)
-                except Exception as e:
-                    self.handle_exception(e)
-                    return
-            else:
-                raise ValueError('Unknown file format')
+            try:
+                actions, self.settings = runner.read_file_xml(self.opened_file)
+            except Exception as e:
+                self.handle_exception(e)
+                return
 
             self.actions_table.setModel(ActionsModel(actions))
 
-    def file_save(self, always_open_dialog: bool = False) -> Optional[int]:
+    def file_save(self, always_open_dialog: bool = False) -> None | int:
         """always_open_dialog is only used in self.file_save_as()"""
         if self.opened_file == DEFAULT_OPENED_FILE or always_open_dialog:
             file_dialog = QFileDialog(self,
@@ -644,29 +629,12 @@ class MainWindow(QMainWindow):
             else:
                 return 1
 
-        if self.opened_file_filter == '.mcrc XML (*.mcrc)':
-            try:
-                runner.write_file_xml(self.opened_file,
-                                      self.actions_table.model().actions,
-                                      self.settings)
-            except Exception as e:
-                self.handle_exception(e)
-        elif self.opened_file_filter == '.mcrc CSV (*.mcrc)':
-            try:
-                runner.write_file_csv(self.opened_file,
-                                      self.actions_table.model().actions,
-                                      self.settings)
-            except Exception as e:
-                self.handle_exception(e)
-        elif self.opened_file_filter == '.mcrc DB (*.mcrc)':
-            try:
-                runner.write_file_db(self.opened_file,
-                                     self.actions_table.model().actions,
-                                     self.settings)
-            except Exception as e:
-                self.handle_exception(e)
-        else:
-            raise ValueError('Unknown file format')
+        try:
+            runner.write_file_xml(self.opened_file,
+                                  self.actions_table.model().actions,
+                                  self.settings)
+        except Exception as e:
+            self.handle_exception(e)
 
     def file_save_as(self):
         old_file = self.opened_file

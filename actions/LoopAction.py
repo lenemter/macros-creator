@@ -1,5 +1,3 @@
-from typing import Optional
-
 from gui.EditDialogs import LoopEditDialog
 from .Action import Action
 
@@ -29,7 +27,7 @@ class LoopAction(Action):
         if edit_dialog.user_clicked_ok:
             self.comment, self.loop_start, self.count = edit_dialog.properties
 
-    def run(self) -> Optional[int]:
+    def run(self) -> None | int:
         if self.__count == 0 or self.__stop_flag:
             self.__count = self.count
             return None
